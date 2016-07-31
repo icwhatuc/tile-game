@@ -4,8 +4,8 @@ import GridRow from './grid-row';
 
 class Grid extends React.Component {
   render () {
-    let gridRows = this.props.data.map(function(row, rowIdx) {
-      return <GridRow data={row} key={rowIdx}/>
+    let gridRows = this.props.grid.map(function(row, rowIdx) {
+      return <GridRow row={row} key={rowIdx}/>
     });
     return (
       <div className="grid">
