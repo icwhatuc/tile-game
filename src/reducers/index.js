@@ -44,7 +44,12 @@ function generateFallingBlock(state) {
 }
 
 function applyGravity(state) {
-  // TODO
+  // TODO - ultimately middleware will provide
+  // a constructed grid that can be used here
+  // Add a check to see if the fallingBlock overlaps with
+  // any blocks in the grid after falling, if so don't
+  // update it's position, add it to existing list of blocks,
+  // and generate a new falling block
   let gravityStrength = 1;
   let fallingBlock = state.fallingBlock.map((tile) => {
     return BlockFactory.translateTile(tile, undefined, gravityStrength);
@@ -56,10 +61,10 @@ function applyGravity(state) {
   let updatedState;
   
   fallingBlock = offGrid ? [] : fallingBlock;
-
   updatedState = _.assign({}, state, {fallingBlock});
+  
   return offGrid ? 
-    generateFallingBlock(updatedState) : // TODO: temp HACK
+    generateFallingBlock(updatedState) : // TODO: temp HACK - is there a better place for this
     updatedState;
 }
 

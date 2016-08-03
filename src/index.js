@@ -21,5 +21,5 @@ render(
     <App />
   </Provider>,
   MOUNT_NODE
-)
+);
 
