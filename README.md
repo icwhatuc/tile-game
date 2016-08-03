@@ -1,1 +1,1 @@
-# tile-game## TODO* setup route* setup redux * store * actions * reducers* setup webpack dev server with hot reloading
+# tile-game## Implementation DetailsThe game is implemented using HTML/CSS/JS.In terms of javascript, `react` and `redux` power much of the game.## DevelopmentIn order to spin up a webpack-dev-server, run```npm run dev```Access the app by hitting http://localhost:8080/ in the browser.
