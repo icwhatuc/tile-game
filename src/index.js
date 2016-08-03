@@ -1,14 +1,20 @@
 import React from 'react';
 import {render} from 'react-dom';
-import {Provider} from 'react-redux'
-import {createStore} from 'redux'
+import {Provider} from 'react-redux';
+import {createStore, applyMiddleware} from 'redux';
+import thunk from 'redux-thunk';
 
-import reducers from './reducers'
-import App from './containers/AppConnector'
+import reducer from './reducers';
+import App from './containers/AppConnector';
+import middleware from './middleware';
 
-let store = createStore(reducers);
+const {logger} = middleware;
+let store = createStore(
+  reducer
+  , applyMiddleware(thunk, logger)
+);
 
-const MOUNT_NODE = document.getElementById('root')
+const MOUNT_NODE = document.getElementById('root');
 
 render(
   <Provider store={store}>
@@ -16,5 +22,4 @@ render(
   </Provider>,
   MOUNT_NODE
 )
-
 
