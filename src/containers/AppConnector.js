@@ -6,7 +6,7 @@ function mapStateToProps(state, ownProps) {
     return _.assign({}, state, ownProps);
 }
 
-const AppConnector = connect(mapStateToProps)(App)
+const AppConnector = connect(mapStateToProps)(App);
 
 export default AppConnector;
 

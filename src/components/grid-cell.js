@@ -4,11 +4,11 @@ class GridCell extends React.Component {
   render () {
     let classes = [
       "grid__cell"
-      , "tile-" + this.props.value
+      // , "tile-" + this.props.value
     ];
     return (
       <div className={classes.join(' ')}>
-        {this.props.value}
+        {this.props.value || 0 /* TODO */}
       </div>
     )
   }

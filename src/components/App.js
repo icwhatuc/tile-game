@@ -5,14 +5,13 @@ import applyGravity from '../game/applyGravity';
 import * as actions from '../actions';
 
 class App extends React.Component {
-  updateGrid() {
-    let {grid, fallingBlock} = this.props;
-    let updatedGrid = applyGravity(grid);
-    this.props.dispatch(actions.setGrid(updatedGrid));
+  tick() {
+    this.props.dispatch(actions.applyGravityToFallingBlock());
   }
 
   componentDidMount() {
-    setInterval(this.updateGrid.bind(this), 1000);
+    this.props.dispatch(actions.generateFallingBlock());
+    setInterval(this.tick.bind(this), 1000); // TODO: hardcoded interval
   }
 
   render () {

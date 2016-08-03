@@ -1,37 +1,31 @@
 import _ from 'lodash';
-
-// TODO
-const grid = [
-    [2, 2, 0, 0, 0, 0, 0, 0, 0, 0]
-    , [0, 4, 2, 0, 0, 0, 0, 0, 0, 0]
-    , [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    , [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    , [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    , [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    , [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    , [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    , [0, 0, 0, 0, 0, 32, 16, 0, 0, 0]
-    , [0, 0, 0, 0, 0, 32, 32, 64, 0, 0]
-];
-const fallingBlock = [
-    {position: [0,0], value: 2}
-    , {position: [0,1], value: 2}
-    , {position: [1,1], value: 4}
-    , {position: [1,2], value: 2}
-];
+import * as BlockFactory from '../game/blocks';
 
 const initialState = {
-  grid
-  , fallingBlock
+  fallingBlock: []
+  , blocks: []
+  , gridSize: {
+    width: 10
+    , height: 14
+    , hidden: 4
+  }
 };
 
 export default (state = initialState, action) => {
+  // TODO: split up into separate reducers
+  // and use combineReducers
   const actionMap = {
     SET_GRID: updateStateWithGrid
+    , GENERATE_FALLING_BLOCK: generateFallingBlock
+    , APPLY_GRAVITY: applyGravity
+    , SHIFT_FALLING_BLOCK: shiftFallingBlock
+    , ROTATE_FALLING_BLOCK: rotateFallingBlock
+    , SPEED_UP_FALLING_BLOCK: speedUpFallingBlock
+    , CHECK_GAME_STATE: checkGameState
   };
 
   let handler = actionMap[action.type];
-  
+
   return handler ? handler(state, action.data) : state;
 }
 
@@ -39,5 +33,49 @@ function updateStateWithGrid(state, grid) {
   return _.assign({}, state, {
     grid
   });
+}
+
+function generateFallingBlock(state) {
+  return _.assign({}, state, {
+    fallingBlock: BlockFactory.generateRandomBlock({
+      gridSize: state.gridSize
+    })
+  });
+}
+
+function applyGravity(state) {
+  // TODO
+  let gravityStrength = 1;
+  let fallingBlock = state.fallingBlock.map((tile) => {
+    return BlockFactory.translateTile(tile, undefined, gravityStrength);
+  });
+  let gridHeight = state.gridSize.height;
+  let offGrid = fallingBlock.reduce((check, tile) => {
+    return check || tile.position.y >= gridHeight;
+  }, false);
+  let updatedState;
+  
+  fallingBlock = offGrid ? [] : fallingBlock;
+
+  updatedState = _.assign({}, state, {fallingBlock});
+  return offGrid ? 
+    generateFallingBlock(updatedState) : // TODO: temp HACK
+    updatedState;
+}
+
+function shiftFallingBlock(state, direction) {
+  return state;
+}
+
+function rotateFallingBlock(state, direction) {
+  return state;
+}
+
+function speedUpFallingBlock(state) {
+  return state;
+}
+
+function checkGameState(state) {
+  return state;
 }
 
