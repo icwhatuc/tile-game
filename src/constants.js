@@ -17,5 +17,9 @@ module.exports = {
     , SQUARE: 'SQUARE'
   }
   , DEFAULT_BLOCK: 'LINE'
+  , KEYEVENTS: {
+    LEFT_SHIFT: 37
+    , RIGHT_SHIFT: 39
+  }
 };
 

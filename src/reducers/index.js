@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import * as BlockFactory from '../game/blocks';
+import CONSTANTS from '../constants';
 
 const initialState = {
   fallingBlock: []
@@ -10,6 +11,7 @@ const initialState = {
     , hidden: 4
   }
 };
+
 
 export default (state = initialState, action) => {
   // TODO: split up into separate reducers
@@ -69,7 +71,25 @@ function applyGravity(state) {
 }
 
 function shiftFallingBlock(state, direction) {
-  return state;
+  let updatedBlock;
+  
+  // TODO: check for edge cases
+  switch(direction) {
+    case CONSTANTS.KEYEVENTS.LEFT_SHIFT:
+      updatedBlock = state.fallingBlock.map((tile) => {
+        return BlockFactory.translateTile(tile, -1, undefined);
+      });
+      break;
+    case CONSTANTS.KEYEVENTS.RIGHT_SHIFT:
+      updatedBlock = state.fallingBlock.map((tile) => {
+        return BlockFactory.translateTile(tile, 1, undefined);
+      });
+      break;
+  };
+
+  return _.assign({}, state, {
+    fallingBlock: updatedBlock
+  });
 }
 
 function rotateFallingBlock(state, direction) {
