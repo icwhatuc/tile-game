@@ -12,7 +12,7 @@ const {
 
 class App extends React.Component {
   tick() {
-    this.props.dispatch(actions.applyGravityToFallingBlock());
+    this.props.dispatch(actions.tick());
   }
 
   onKeyDown(e) {

@@ -20,9 +20,14 @@ class Grid extends React.Component {
   }
 
   render() {
-    let grid = this.constructGrid();
+    let self = this;
+    let grid = self.constructGrid();
     let gridRows = grid.map(function(row, rowIdx) {
-      return <GridRow row={row} key={rowIdx}/>
+      return <GridRow
+        tick={self.props.tick}
+        row={row}
+        rowIdx={rowIdx}
+        key={rowIdx}/>
     });
     return (
       <div className="grid">

@@ -10,6 +10,7 @@ const initialState = {
     , height: 14
     , hidden: 4
   }
+  , tick: 0
 };
 
 
@@ -63,7 +64,7 @@ function applyGravity(state) {
   let updatedState;
   
   fallingBlock = offGrid ? [] : fallingBlock;
-  updatedState = _.assign({}, state, {fallingBlock});
+  updatedState = _.assign({}, state, {tick: state.tick+1, fallingBlock});
   
   return offGrid ? 
     generateFallingBlock(updatedState) : // TODO: temp HACK - is there a better place for this

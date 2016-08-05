@@ -23,6 +23,12 @@ export function generateFallingBlock() {
     };
 }
 
+export function tick() {
+  return (dispatch) => {
+    dispatch(applyGravityToFallingBlock());
+  };
+}
+
 /*
  * IDEAS: can increase the effects of gravity
  */
