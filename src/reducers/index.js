@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import * as BlockFactory from '../game/blocks';
+import * as GridFactory from '../game/grid';
 import CONSTANTS from '../constants';
 
 const initialState = {
@@ -11,6 +12,8 @@ const initialState = {
     , hidden: 4
   }
   , tick: 0
+  , grid: []
+  , visibleGrid: []
 };
 
 
@@ -28,8 +31,11 @@ export default (state = initialState, action) => {
   };
 
   let handler = actionMap[action.type];
+  let updatedState = handler ?
+    handler(state, action.data) :
+    state;
 
-  return handler ? handler(state, action.data) : state;
+  return computeGrid(updatedState);
 }
 
 function updateStateWithGrid(state, grid) {
@@ -103,5 +109,18 @@ function speedUpFallingBlock(state) {
 
 function checkGameState(state) {
   return state;
+}
+
+function computeGrid(state) {
+  let grid = GridFactory.constructGrid(
+    state.gridSize.height
+    , state.gridSize.width
+    , [state.fallingBlock].concat(state.blocks)
+  );
+  let visibleGrid = grid.slice(state.gridSize.hidden);
+  return _.assign({}, state, {
+    grid
+    , visibleGrid
+  });
 }
 
