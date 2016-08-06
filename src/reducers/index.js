@@ -92,6 +92,11 @@ function shiftFallingBlock(state, direction) {
         return BlockFactory.translateTile(tile, 1, undefined);
       });
       break;
+    case CONSTANTS.KEYEVENTS.DOWN_SHIFT:
+      updatedBlock = state.fallingBlock.map((tile) => {
+        return BlockFactory.translateTile(tile, undefined, 1);
+      });
+      break;
   };
 
   return _.assign({}, state, {

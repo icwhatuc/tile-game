@@ -8,6 +8,7 @@ import * as actions from '../actions';
 const {
   LEFT_SHIFT
   , RIGHT_SHIFT
+  , DOWN_SHIFT
 } = CONSTANTS.KEYEVENTS;
 
 class App extends React.Component {
@@ -23,6 +24,9 @@ class App extends React.Component {
         break;
       case RIGHT_SHIFT:
         this.props.dispatch(actions.shiftFallingBlock(RIGHT_SHIFT));
+        break;
+      case DOWN_SHIFT:
+        this.props.dispatch(actions.shiftFallingBlock(DOWN_SHIFT));
         break;
     };
   }
