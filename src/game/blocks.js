@@ -113,7 +113,7 @@ function calculateRangeGivenProp(block, prop) {
 
 
 
-function rotateBlock(block, direction, options) {
+export function rotateBlock(block, direction, options) {
   let {gridWidth} = options;
   return block;
 }
