@@ -121,6 +121,9 @@ function computeGrid(state) {
     state.gridSize.height
     , state.gridSize.width
     , [state.fallingBlock].concat(state.blocks)
+    , {
+        assignValues: true
+    }
   );
   let visibleGrid = grid.slice(state.gridSize.hidden);
   return _.assign({}, state, {

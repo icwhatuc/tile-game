@@ -5,11 +5,12 @@ export function constructEmptyGrid(gridHeight, gridWidth) {
   return Array.apply(null, Array(gridHeight)).map(rowGenerator);
 }
 
-export function constructGrid(gridHeight, gridWidth, blocks) {
+export function constructGrid(gridHeight, gridWidth, blocks, options = {}) {
   let grid = constructEmptyGrid(gridHeight, gridWidth);
   blocks.forEach((block, blockIdx) => {
     block.forEach((tile) => {
-      grid[tile.position.y][tile.position.x] = blockIdx;
+      grid[tile.position.y][tile.position.x] = options.assignValues ?
+        tile.value : blockIdx;
     });
   });
   return grid;
