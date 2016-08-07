@@ -85,8 +85,8 @@ function positionRandomly(block, options) {
 export function translateTile(tile, offsetx = 0, offsety = 0) {
   return _.assign({}, tile, {
     position: {
-      x: _.get(tile, 'position.x') + offsetx
-      , y: _.get(tile, 'position.y') + offsety
+      x: tile.position.x + offsetx
+      , y: tile.position.y + offsety
     }
   });
 }
@@ -113,7 +113,7 @@ function calculateRangeGivenProp(block, prop) {
 
 
 
-function rotateBlock(block, options) {
+function rotateBlock(block, direction, options) {
   let {gridWidth} = options;
   return block;
 }
