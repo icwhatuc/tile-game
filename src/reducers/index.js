@@ -105,7 +105,11 @@ function shiftFallingBlock(state, direction) {
 }
 
 function rotateFallingBlock(state, direction) {
-  return state;
+  return _.assign({}, state, {
+    fallingBlock: BlockFactory.rotateBlock(state.fallingBlock, direction, {
+      gridWidth: state.gridSize.width
+    })
+  });
 }
 
 function speedUpFallingBlock(state) {
