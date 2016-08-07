@@ -111,3 +111,10 @@ function calculateRangeGivenProp(block, prop) {
   return max - min;
 }
 
+
+
+function rotateBlock(block, options) {
+  let {gridWidth} = options;
+  return block;
+}
+
