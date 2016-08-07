@@ -7,9 +7,9 @@ export function constructEmptyGrid(gridHeight, gridWidth) {
 
 export function constructGrid(gridHeight, gridWidth, blocks) {
   let grid = constructEmptyGrid(gridHeight, gridWidth);
-  blocks.forEach((block) => {
+  blocks.forEach((block, blockIdx) => {
     block.forEach((tile) => {
-      grid[tile.position.y][tile.position.x] = tile.value;
+      grid[tile.position.y][tile.position.x] = blockIdx;
     });
   });
   return grid;
