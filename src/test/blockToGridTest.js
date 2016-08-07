@@ -1,6 +1,6 @@
 var test = require('tape').test;
 
-var blocksToGrid = require('../game/blocksToGrid.js');
+var gridFactory = require('../game/grid.js');
 
 // need to discuss where x and y are; looks to be a bit inconsistent!
 test('Blocks to grid', function(t) {
@@ -23,18 +23,18 @@ test('Blocks to grid', function(t) {
     ];
     var expectedGrid = 
     [
-        [2,2,2,4,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,4,0,0],
-        [0,0,0,0,0,2,2,2,0,0],
+        [0   ,0   ,0   ,0   ,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,1   ,null,null],
+        [null,null,null,null,null,1   ,1   ,1   ,null,null],
     ];
-    var actualGrid = blocksToGrid(blocks, 10);
+    var actualGrid = gridFactory(10, 10, blocks);
     t.deepEqual(actualGrid, expectedGrid, 'should have blocks in the proper position');
-    t.end();
+    t.plan(1);
 });
