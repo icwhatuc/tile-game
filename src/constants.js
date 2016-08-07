@@ -21,6 +21,8 @@ module.exports = {
     LEFT_SHIFT: 37
     , RIGHT_SHIFT: 39
     , DOWN_SHIFT: 40
+    , CLOCKWISE_ROTATION: 67
+    , CCLOCKWISE_ROTATION: 88
   }
 };
 
