@@ -28,6 +28,7 @@ export function tick() {
   return (dispatch) => {
     dispatch({type: TICK});
     dispatch(applyGravityToFallingBlock());
+    dispatch(checkGameState());
   };
 }
 
