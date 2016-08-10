@@ -13,6 +13,7 @@ const initialState = {
   }
   , tick: 0
   , grid: []
+  , displayGrid: []
   , visibleGrid: []
 };
 
@@ -60,21 +61,25 @@ function applyGravity(state) {
   // update it's position, add it to existing list of blocks,
   // and generate a new falling block
   let gravityStrength = 1;
-  let fallingBlock = state.fallingBlock.map((tile) => {
+  let {grid, fallingBlock, blocks, gridSize} = state;
+  let updatedFallingBlock = fallingBlock.map((tile) => {
     return BlockFactory.translateTile(tile, undefined, gravityStrength);
   });
-  let gridHeight = state.gridSize.height;
-  let offGrid = fallingBlock.reduce((check, tile) => {
-    return check || tile.position.y >= gridHeight;
+  let isInvalidPosition = updatedFallingBlock.reduce((check, tile) => {
+    return check
+      || tile.position.y >= gridSize.height // off grid
+      || grid[tile.position.y][tile.position.x] > 0; // occupied
   }, false);
-  let updatedState;
-  
-  fallingBlock = offGrid ? [] : fallingBlock;
-  updatedState = _.assign({}, state, {tick: state.tick+1, fallingBlock});
-  
-  return offGrid ? 
-    generateFallingBlock(updatedState) : // TODO: temp HACK - is there a better place for this
-    updatedState;
+
+  if(isInvalidPosition) {
+    blocks = blocks.concat([fallingBlock]);
+    fallingBlock = BlockFactory.generateRandomBlock({gridSize});
+  }
+  else {
+    fallingBlock = updatedFallingBlock;
+  }
+
+  return _.assign({}, state, {fallingBlock, blocks});
 }
 
 function shiftFallingBlock(state, direction) {
@@ -121,13 +126,19 @@ function computeGrid(state) {
     state.gridSize.height
     , state.gridSize.width
     , [state.fallingBlock].concat(state.blocks)
+  );
+  let displayGrid = GridFactory.constructGrid(
+    state.gridSize.height
+    , state.gridSize.width
+    , [state.fallingBlock].concat(state.blocks)
     , {
         assignValues: true
     }
   );
-  let visibleGrid = grid.slice(state.gridSize.hidden);
+  let visibleGrid = displayGrid.slice(state.gridSize.hidden);
   return _.assign({}, state, {
     grid
+    , displayGrid
     , visibleGrid
   });
 }
