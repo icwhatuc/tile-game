@@ -1,12 +1,13 @@
 import CONSTANTS from '../constants';
 
 const {
-    GENERATE_FALLING_BLOCK
-    , APPLY_GRAVITY
-    , SHIFT_FALLING_BLOCK
-    , ROTATE_FALLING_BLOCK
-    , SPEED_UP_FALLING_BLOCK
-    , CHECK_GAME_STATE
+  TICK
+  , GENERATE_FALLING_BLOCK
+  , APPLY_GRAVITY
+  , SHIFT_FALLING_BLOCK
+  , ROTATE_FALLING_BLOCK
+  , SPEED_UP_FALLING_BLOCK
+  , CHECK_GAME_STATE
 } = CONSTANTS.MECHANICS;
 
 // TODO: remove
@@ -25,6 +26,7 @@ export function generateFallingBlock() {
 
 export function tick() {
   return (dispatch) => {
+    dispatch({type: TICK});
     dispatch(applyGravityToFallingBlock());
   };
 }

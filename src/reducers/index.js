@@ -21,7 +21,7 @@ export default (state = initialState, action) => {
   // TODO: split up into separate reducers
   // and use combineReducers
   const actionMap = {
-    SET_GRID: updateStateWithGrid
+    TICK: tick
     , GENERATE_FALLING_BLOCK: generateFallingBlock
     , APPLY_GRAVITY: applyGravity
     , SHIFT_FALLING_BLOCK: shiftFallingBlock
@@ -38,9 +38,9 @@ export default (state = initialState, action) => {
   return computeGrid(updatedState);
 }
 
-function updateStateWithGrid(state, grid) {
+function tick(state) {
   return _.assign({}, state, {
-    grid
+    tick: state.tick + 1
   });
 }
 
