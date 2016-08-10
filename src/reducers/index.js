@@ -65,13 +65,19 @@ function applyGravity(state) {
   let updatedFallingBlock = fallingBlock.map((tile) => {
     return BlockFactory.translateTile(tile, undefined, gravityStrength);
   });
-  let isInvalidPosition = updatedFallingBlock.reduce((check, tile) => {
+  let isValidPosition = updatedFallingBlock.reduce((check, tile) => {
+    let isOccupied = _.get(grid, [tile.position.y, tile.position.x]) > 0;
     return check
-      || tile.position.y >= gridSize.height // off grid
-      || grid[tile.position.y][tile.position.x] > 0; // occupied
-  }, false);
+      // grid check
+      && tile.position.y < gridSize.height
+      && tile.position.y >= 0
+      && tile.position.x < gridSize.width
+      && tile.position.x >= 0
+      // occupied check
+      && !isOccupied;
+  }, true);
 
-  if(isInvalidPosition) {
+  if(!isValidPosition) {
     blocks = blocks.concat([fallingBlock]);
     fallingBlock = BlockFactory.generateRandomBlock({gridSize});
   }
@@ -83,30 +89,43 @@ function applyGravity(state) {
 }
 
 function shiftFallingBlock(state, direction) {
-  let updatedBlock;
+  let {grid, fallingBlock, gridSize} = state;
+  let updatedFallingBlock;
   
   // TODO: check for edge cases
   switch(direction) {
     case CONSTANTS.KEYEVENTS.LEFT_SHIFT:
-      updatedBlock = state.fallingBlock.map((tile) => {
+      updatedFallingBlock = fallingBlock.map((tile) => {
         return BlockFactory.translateTile(tile, -1, undefined);
       });
       break;
     case CONSTANTS.KEYEVENTS.RIGHT_SHIFT:
-      updatedBlock = state.fallingBlock.map((tile) => {
+      updatedFallingBlock = fallingBlock.map((tile) => {
         return BlockFactory.translateTile(tile, 1, undefined);
       });
       break;
     case CONSTANTS.KEYEVENTS.DOWN_SHIFT:
-      updatedBlock = state.fallingBlock.map((tile) => {
+      updatedFallingBlock = fallingBlock.map((tile) => {
         return BlockFactory.translateTile(tile, undefined, 1);
       });
       break;
   };
 
-  return _.assign({}, state, {
-    fallingBlock: updatedBlock
-  });
+  let isValidPosition = updatedFallingBlock.reduce((check, tile) => {
+    let isOccupied = _.get(grid, [tile.position.y, tile.position.x]) > 0;
+    return check
+      // grid check
+      && tile.position.y < gridSize.height
+      && tile.position.y >= 0
+      && tile.position.x < gridSize.width
+      && tile.position.x >= 0
+      // occupied check
+      && !isOccupied;
+  }, true);
+
+  return isValidPosition ? _.assign({}, state, {
+    fallingBlock: updatedFallingBlock
+  }) : state;
 }
 
 function rotateFallingBlock(state, direction) {
