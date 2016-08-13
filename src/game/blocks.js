@@ -4,6 +4,7 @@ import CONSTANTS from '../constants';
 const {
   LINE
   , SQUARE
+  , LBLOCK
 } = CONSTANTS.BLOCK_TYPES;
 const {DEFAULT_BLOCK} = CONSTANTS;
 
@@ -11,6 +12,7 @@ const {DEFAULT_BLOCK} = CONSTANTS;
  * definitions assume a 4 by 4 grid
  */
 const BLOCK_DEFINITIONS = {
+    /*
   LINE: [
     {position: {x: 0, y: 0}}
     , {position: {x: 0, y: 1}}
@@ -22,6 +24,12 @@ const BLOCK_DEFINITIONS = {
     , {position: {x: 1, y: 2}}
     , {position: {x: 0, y: 3}}
     , {position: {x: 1, y: 3}}
+  ]
+  , */ LBLOCK: [
+    {position: {x:0, y:1}}
+    , {position: {x:0, y:2}}
+    , {position: {x:0, y:3}}
+    , {position: {x:1, y:3}}
   ]
 };
 
@@ -111,10 +119,68 @@ function calculateRangeGivenProp(block, prop) {
   return max - min;
 }
 
+function findCenterPosition(block) {
+    let sumx = block.reduce((currSum, tile) => {
+        return currSum + tile.position.x;
+    }, 0);
+    let sumy = block.reduce((currSum, tile) => {
+        return currSum + tile.position.y;
+    }, 0);
 
+    let blockLength = block.length;
+    let centerPosition = {
+        x: Math.floor(sumx/blockLength),
+        y: Math.ceil(sumy/blockLength)
+    };
+    return centerPosition;
+}
+
+function rotateFunctionAroundPoint(tile, direction, centerPosition, gridWidth)
+{
+    console.log(tile.position.x);
+    console.log(tile.position.y);
+    console.log(centerPosition.y);
+    console.log(tile.position.x+centerPosition.y);
+    
+    let originx = tile.position.x - centerPosition.x;
+    let originy = tile.position.y - centerPosition.y;
+    
+    
+    let newx, newy;
+    if (direction==CONSTANTS.CCLOCKWISE_ROTATION)
+    {
+        newx = originy + centerPosition.x;
+        newy = -originx + centerPosition.y;
+    }
+    else if (direction==CONSTANTS.CLOCKWISE_ROTATION)
+    {
+        newx = originy + centerPosition.x;
+        newy = originx + centerPosition.y;
+    }
+
+    return {
+        position: {
+            x: newx,
+            y: newy,
+        },
+        value: tile.value
+    };
+}
 
 export function rotateBlock(block, direction, options) {
-  let {gridWidth} = options;
-  return block;
+    let {gridWidth} = options;
+
+    let centerPosition = findCenterPosition(block);
+
+    let newBlock = block.map((tile) => {
+        console.log(tile);
+        console.log("---");
+        return rotateFunctionAroundPoint(tile, direction, centerPosition, gridWidth);
+    });
+
+    console.log(centerPosition);
+
+    console.log(newBlock);
+    return newBlock;
 }
 

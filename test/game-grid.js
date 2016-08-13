@@ -2,7 +2,7 @@ var test = require('tape').test;
 
 var GridFactory = require('../src/game/grid.js');
 
-// need to discuss where x and y are; looks to be a bit inconsistent!
+// Note, graphics style coordinates; +x=right, +y=down
 test('Blocks to grid', function(t) {
     t.plan(1);
     // note: top left is 0,0

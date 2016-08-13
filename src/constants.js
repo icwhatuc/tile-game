@@ -15,6 +15,7 @@ module.exports = {
   , BLOCK_TYPES: {
     LINE: 'LINE'
     , SQUARE: 'SQUARE'
+    , LBLOCK: 'LBLOCK'
   }
   , DEFAULT_BLOCK: 'LINE'
   , KEYEVENTS: {
