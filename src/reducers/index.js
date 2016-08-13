@@ -29,6 +29,7 @@ export default (state = initialState, action) => {
     , SHIFT_FALLING_BLOCK: shiftFallingBlock
     , ROTATE_FALLING_BLOCK: rotateFallingBlock
     , SPEED_UP_FALLING_BLOCK: speedUpFallingBlock
+    , ELIMINATE_LINES: eliminateLines
     , CHECK_GAME_STATE: checkGameState
   };
 
@@ -135,6 +136,56 @@ function rotateFallingBlock(state, direction) {
 
 function speedUpFallingBlock(state) {
   return state;
+}
+
+function eliminateLines(state) {
+  let {grid, gridSize, blocks, fallingBlock} = state;
+  let isNewFallingBlock = fallingBlock.reduce((newBlockFlag, tile) => {
+    return newBlockFlag && tile.position.y < gridSize.hidden;
+  }, true);
+
+  if(!isNewFallingBlock) {
+    return state;
+  }
+
+  let rowsToEliminate = grid.reduce((completedRows, gridRow, rowIdx) => {
+    let isComplete = gridRow.reduce((completeFlag, gridCell) => {
+      return completeFlag ? 
+        gridCell !== null
+        : false;
+    }, true);
+    if(isComplete) {
+      completedRows[rowIdx] = true;
+    }
+    return completedRows;
+  },  {});
+
+  if(Object.keys(rowsToEliminate).length === 0) {
+    return state;
+  }
+
+  let updatedBlocks = blocks.map((block) => {
+    // eliminate tiles
+    return block.filter((tile) => {
+      return !rowsToEliminate[tile.position.y];
+    })
+    // shift remaining tiles down
+    .map((tile) => {
+      // tiles shift down based on how many rows below are eliminated
+      let translateY = Object.keys(rowsToEliminate).reduce((count, eliminatedRowIdx) => {
+        return tile.position.y < eliminatedRowIdx ? count + 1 : count;
+      }, 0);
+      return BlockFactory.translateTile(tile, 0, translateY);
+    })
+  })
+  // eliminates blocks without any tiles left
+  .filter((block) => {
+    return block.length;
+  });
+
+  return _.assign({}, state, {
+    blocks: updatedBlocks
+  });
 }
 
 function checkGameState(state) {
