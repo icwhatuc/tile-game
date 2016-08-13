@@ -15,6 +15,7 @@ const initialState = {
   , grid: []
   , displayGrid: []
   , visibleGrid: []
+  , lossFlag: false
 };
 
 
@@ -137,7 +138,21 @@ function speedUpFallingBlock(state) {
 }
 
 function checkGameState(state) {
-  return state;
+  let {grid, gridSize} = state;
+  let updatedLossFlag = grid.slice(0, gridSize.hidden).reduce((check, row, y) => {
+    return check ||
+      row.reduce((rowCheck, cellValue, x) => {
+        return rowCheck || cellValue > 0;
+      }, false);
+  }, false);
+  return updatedLossFlag ?_.assign({}, state, {
+    grid: []
+    , visibleGrid: []
+    , displayGrid: []
+    , blocks: []
+    , fallingBlock: []
+    , lossFlag: true
+  }) : state;
 }
 
 function computeGrid(state) {
