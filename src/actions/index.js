@@ -7,6 +7,7 @@ const {
   , SHIFT_FALLING_BLOCK
   , ROTATE_FALLING_BLOCK
   , SPEED_UP_FALLING_BLOCK
+  , ELIMINATE_LINES
   , CHECK_GAME_STATE
 } = CONSTANTS.MECHANICS;
 
@@ -28,6 +29,7 @@ export function tick() {
   return (dispatch) => {
     dispatch({type: TICK});
     dispatch(applyGravityToFallingBlock());
+    dispatch(eliminateLines());
     dispatch(checkGameState());
   };
 }
@@ -58,6 +60,12 @@ export function rotateFallingBlock(direction) {
 export function speedUpFallingBlock() {
     return {
         type: SPEED_UP_FALLING_BLOCK
+    };
+}
+
+export function eliminateLines() {
+    return {
+        type: ELIMINATE_LINES
     };
 }
 
