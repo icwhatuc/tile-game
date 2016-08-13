@@ -2,13 +2,14 @@ import React, { PropTypes } from 'react';
 
 class GridCell extends React.Component {
   render () {
+    let displayValue = this.props.value || 0;
     let classes = [
       "grid__cell"
-      , "tile-" + this.props.value
+      , "tile-" + (displayValue)
     ];
     return (
       <div className={classes.join(' ')}>
-        {this.props.value || 0 /* TODO */}
+        {displayValue}
       </div>
     )
   }

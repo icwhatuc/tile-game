@@ -13,6 +13,7 @@ const initialState = {
   }
   , tick: 0
   , grid: []
+  , displayGrid: []
   , visibleGrid: []
 };
 
@@ -21,7 +22,7 @@ export default (state = initialState, action) => {
   // TODO: split up into separate reducers
   // and use combineReducers
   const actionMap = {
-    SET_GRID: updateStateWithGrid
+    TICK: tick
     , GENERATE_FALLING_BLOCK: generateFallingBlock
     , APPLY_GRAVITY: applyGravity
     , SHIFT_FALLING_BLOCK: shiftFallingBlock
@@ -38,9 +39,9 @@ export default (state = initialState, action) => {
   return computeGrid(updatedState);
 }
 
-function updateStateWithGrid(state, grid) {
+function tick(state) {
   return _.assign({}, state, {
-    grid
+    tick: state.tick + 1
   });
 }
 
@@ -60,48 +61,71 @@ function applyGravity(state) {
   // update it's position, add it to existing list of blocks,
   // and generate a new falling block
   let gravityStrength = 1;
-  let fallingBlock = state.fallingBlock.map((tile) => {
+  let {grid, fallingBlock, blocks, gridSize} = state;
+  let updatedFallingBlock = fallingBlock.map((tile) => {
     return BlockFactory.translateTile(tile, undefined, gravityStrength);
   });
-  let gridHeight = state.gridSize.height;
-  let offGrid = fallingBlock.reduce((check, tile) => {
-    return check || tile.position.y >= gridHeight;
-  }, false);
-  let updatedState;
-  
-  fallingBlock = offGrid ? [] : fallingBlock;
-  updatedState = _.assign({}, state, {tick: state.tick+1, fallingBlock});
-  
-  return offGrid ? 
-    generateFallingBlock(updatedState) : // TODO: temp HACK - is there a better place for this
-    updatedState;
+  let isValidPosition = updatedFallingBlock.reduce((check, tile) => {
+    let isOccupied = _.get(grid, [tile.position.y, tile.position.x]) > 0;
+    return check
+      // grid check
+      && tile.position.y < gridSize.height
+      && tile.position.y >= 0
+      && tile.position.x < gridSize.width
+      && tile.position.x >= 0
+      // occupied check
+      && !isOccupied;
+  }, true);
+
+  if(!isValidPosition) {
+    blocks = blocks.concat([fallingBlock]);
+    fallingBlock = BlockFactory.generateRandomBlock({gridSize});
+  }
+  else {
+    fallingBlock = updatedFallingBlock;
+  }
+
+  return _.assign({}, state, {fallingBlock, blocks});
 }
 
 function shiftFallingBlock(state, direction) {
-  let updatedBlock;
+  let {grid, fallingBlock, gridSize} = state;
+  let updatedFallingBlock;
   
   // TODO: check for edge cases
   switch(direction) {
     case CONSTANTS.KEYEVENTS.LEFT_SHIFT:
-      updatedBlock = state.fallingBlock.map((tile) => {
+      updatedFallingBlock = fallingBlock.map((tile) => {
         return BlockFactory.translateTile(tile, -1, undefined);
       });
       break;
     case CONSTANTS.KEYEVENTS.RIGHT_SHIFT:
-      updatedBlock = state.fallingBlock.map((tile) => {
+      updatedFallingBlock = fallingBlock.map((tile) => {
         return BlockFactory.translateTile(tile, 1, undefined);
       });
       break;
     case CONSTANTS.KEYEVENTS.DOWN_SHIFT:
-      updatedBlock = state.fallingBlock.map((tile) => {
+      updatedFallingBlock = fallingBlock.map((tile) => {
         return BlockFactory.translateTile(tile, undefined, 1);
       });
       break;
   };
 
-  return _.assign({}, state, {
-    fallingBlock: updatedBlock
-  });
+  let isValidPosition = updatedFallingBlock.reduce((check, tile) => {
+    let isOccupied = _.get(grid, [tile.position.y, tile.position.x]) > 0;
+    return check
+      // grid check
+      && tile.position.y < gridSize.height
+      && tile.position.y >= 0
+      && tile.position.x < gridSize.width
+      && tile.position.x >= 0
+      // occupied check
+      && !isOccupied;
+  }, true);
+
+  return isValidPosition ? _.assign({}, state, {
+    fallingBlock: updatedFallingBlock
+  }) : state;
 }
 
 function rotateFallingBlock(state, direction) {
@@ -121,13 +145,19 @@ function computeGrid(state) {
     state.gridSize.height
     , state.gridSize.width
     , [state.fallingBlock].concat(state.blocks)
+  );
+  let displayGrid = GridFactory.constructGrid(
+    state.gridSize.height
+    , state.gridSize.width
+    , [state.fallingBlock].concat(state.blocks)
     , {
         assignValues: true
     }
   );
-  let visibleGrid = grid.slice(state.gridSize.hidden);
+  let visibleGrid = displayGrid.slice(state.gridSize.hidden);
   return _.assign({}, state, {
     grid
+    , displayGrid
     , visibleGrid
   });
 }
