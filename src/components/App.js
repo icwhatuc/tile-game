@@ -11,6 +11,7 @@ const {
   , DOWN_SHIFT
   , CLOCKWISE_ROTATION
   , CCLOCKWISE_ROTATION
+  , TOGGLE_GRAVITY
 } = CONSTANTS.KEYEVENTS;
 
 class App extends React.Component {
@@ -35,6 +36,9 @@ class App extends React.Component {
         break;
       case CCLOCKWISE_ROTATION:
         this.props.dispatch(actions.rotateFallingBlock(CCLOCKWISE_ROTATION));
+        break;
+      case TOGGLE_GRAVITY:
+        this.props.dispatch(actions.toggleGravity());
         break;
     };
   }
