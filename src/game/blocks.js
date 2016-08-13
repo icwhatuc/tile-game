@@ -2,6 +2,7 @@ import _ from 'lodash';
 import CONSTANTS from '../constants';
 
 const {BLOCKS} = CONSTANTS;
+const {CLOCKWISE_ROTATION, CCLOCKWISE_ROTATION} = CONSTANTS.KEYEVENTS;
 
 export function generateRandomBlock(options) {
   const gridHeight = _.get(options, 'gridSize.height') || 4;
@@ -105,24 +106,18 @@ function findCenterPosition(block) {
     return centerPosition;
 }
 
-function rotateFunctionAroundPoint(tile, direction, centerPosition, gridWidth)
+function rotateTileAroundPoint(tile, direction, centerPosition, gridWidth)
 {
-    console.log(tile.position.x);
-    console.log(tile.position.y);
-    console.log(centerPosition.y);
-    console.log(tile.position.x+centerPosition.y);
-    
     let originx = tile.position.x - centerPosition.x;
     let originy = tile.position.y - centerPosition.y;
     
-    
     let newx, newy;
-    if (direction==CONSTANTS.CCLOCKWISE_ROTATION)
+    if (direction === CCLOCKWISE_ROTATION)
     {
         newx = originy + centerPosition.x;
         newy = -originx + centerPosition.y;
     }
-    else if (direction==CONSTANTS.CLOCKWISE_ROTATION)
+    else if (direction === CLOCKWISE_ROTATION)
     {
         newx = originy + centerPosition.x;
         newy = originx + centerPosition.y;
@@ -143,14 +138,9 @@ export function rotateBlock(block, direction, options) {
     let centerPosition = findCenterPosition(block);
 
     let newBlock = block.map((tile) => {
-        console.log(tile);
-        console.log("---");
-        return rotateFunctionAroundPoint(tile, direction, centerPosition, gridWidth);
+        return rotateTileAroundPoint(tile, direction, centerPosition, gridWidth);
     });
 
-    console.log(centerPosition);
-
-    console.log(newBlock);
     return newBlock;
 }
 
