@@ -1,37 +1,7 @@
 import _ from 'lodash';
 import CONSTANTS from '../constants';
 
-const {
-  LINE
-  , SQUARE
-  , LBLOCK
-} = CONSTANTS.BLOCK_TYPES;
-const {DEFAULT_BLOCK} = CONSTANTS;
-
-/*
- * definitions assume a 4 by 4 grid
- */
-const BLOCK_DEFINITIONS = {
-    /*
-  LINE: [
-    {position: {x: 0, y: 0}}
-    , {position: {x: 0, y: 1}}
-    , {position: {x: 0, y: 2}}
-    , {position: {x: 0, y: 3}}
-  ]
-  , SQUARE: [
-    {position: {x: 0, y: 2}}
-    , {position: {x: 1, y: 2}}
-    , {position: {x: 0, y: 3}}
-    , {position: {x: 1, y: 3}}
-  ]
-  , */ LBLOCK: [
-    {position: {x:0, y:1}}
-    , {position: {x:0, y:2}}
-    , {position: {x:0, y:3}}
-    , {position: {x:1, y:3}}
-  ]
-};
+const {BLOCKS} = CONSTANTS;
 
 export function generateRandomBlock(options) {
   const gridHeight = _.get(options, 'gridSize.height') || 4;
@@ -69,12 +39,12 @@ export function cloneTile(tile) {
 }
 
 function generateRandomBlockType() {
-  let blockTypes = Object.keys(CONSTANTS.BLOCK_TYPES);
+  let blockTypes = Object.keys(BLOCKS);
   return blockTypes[Math.floor(Math.random()*blockTypes.length)];
 }
 
 function generateRandomBlockOfType(type) {
-  return cloneBlock(BLOCK_DEFINITIONS[type]);
+  return cloneBlock(BLOCKS[type]);
 }
 
 function rotateRandomly(block) {

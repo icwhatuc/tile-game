@@ -13,10 +13,29 @@ module.exports = {
     , CHECK_GAME_STATE: 'CHECK_GAME_STATE'
     , TOGGLE_GRAVITY: 'TOGGLE_GRAVITY'
   }
-  , BLOCK_TYPES: {
-    LINE: 'LINE'
-    , SQUARE: 'SQUARE'
-    , LBLOCK: 'LBLOCK'
+  , BLOCKS: {
+    /*
+     * definitions assume a 4 by 4 grid
+     */
+    /*
+    LINE: [
+      {position: {x: 0, y: 0}}
+      , {position: {x: 0, y: 1}}
+      , {position: {x: 0, y: 2}}
+      , {position: {x: 0, y: 3}}
+    ]
+    , SQUARE: [
+      {position: {x: 0, y: 2}}
+      , {position: {x: 1, y: 2}}
+      , {position: {x: 0, y: 3}}
+      , {position: {x: 1, y: 3}}
+    ]
+    , */ LBLOCK: [
+      {position: {x:0, y:1}}
+      , {position: {x:0, y:2}}
+      , {position: {x:0, y:3}}
+      , {position: {x:1, y:3}}
+    ]
   }
   , DEFAULT_BLOCK: 'LINE'
   , KEYEVENTS: {
