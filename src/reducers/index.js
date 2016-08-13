@@ -14,6 +14,7 @@ const initialState = {
   , tick: 0
   , grid: []
   , visibleGrid: []
+  , gravityFlag: true
 };
 
 
@@ -28,6 +29,7 @@ export default (state = initialState, action) => {
     , ROTATE_FALLING_BLOCK: rotateFallingBlock
     , SPEED_UP_FALLING_BLOCK: speedUpFallingBlock
     , CHECK_GAME_STATE: checkGameState
+    , TOGGLE_GRAVITY: toggleGravity
   };
 
   let handler = actionMap[action.type];
@@ -133,6 +135,12 @@ function computeGrid(state) {
   return _.assign({}, state, {
     grid
     , visibleGrid
+  });
+}
+
+function toggleGravity(state) {
+  return _.assign({}, state, {
+    gravityFlag: !state.gravityFlag
   });
 }
 
