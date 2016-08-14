@@ -1,13 +1,14 @@
 import CONSTANTS from '../constants';
 
 const {
-    GENERATE_FALLING_BLOCK
-    , APPLY_GRAVITY
-    , SHIFT_FALLING_BLOCK
-    , ROTATE_FALLING_BLOCK
-    , SPEED_UP_FALLING_BLOCK
-    , CHECK_GAME_STATE
-    , TOGGLE_GRAVITY
+  TICK
+  , GENERATE_FALLING_BLOCK
+  , APPLY_GRAVITY
+  , SHIFT_FALLING_BLOCK
+  , ROTATE_FALLING_BLOCK
+  , SPEED_UP_FALLING_BLOCK
+  , ELIMINATE_LINES
+  , CHECK_GAME_STATE
 } = CONSTANTS.MECHANICS;
 
 // TODO: remove
@@ -25,11 +26,11 @@ export function generateFallingBlock() {
 }
 
 export function tick() {
-  return (dispatch, getState) => {
-    let state = getState();
-    if(state.gravityFlag) {
-      dispatch(applyGravityToFallingBlock());
-    }
+  return (dispatch) => {
+    dispatch({type: TICK});
+    dispatch(applyGravityToFallingBlock());
+    dispatch(eliminateLines());
+    dispatch(checkGameState());
   };
 }
 
@@ -59,6 +60,12 @@ export function rotateFallingBlock(direction) {
 export function speedUpFallingBlock() {
     return {
         type: SPEED_UP_FALLING_BLOCK
+    };
+}
+
+export function eliminateLines() {
+    return {
+        type: ELIMINATE_LINES
     };
 }
 
