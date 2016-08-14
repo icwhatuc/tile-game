@@ -1,29 +1,8 @@
 import _ from 'lodash';
 import CONSTANTS from '../constants';
 
-const {
-  LINE
-  , SQUARE
-} = CONSTANTS.BLOCK_TYPES;
-const {DEFAULT_BLOCK} = CONSTANTS;
-
-/*
- * definitions assume a 4 by 4 grid
- */
-const BLOCK_DEFINITIONS = {
-  LINE: [
-    {position: {x: 0, y: 0}}
-    , {position: {x: 0, y: 1}}
-    , {position: {x: 0, y: 2}}
-    , {position: {x: 0, y: 3}}
-  ]
-  , SQUARE: [
-    {position: {x: 0, y: 2}}
-    , {position: {x: 1, y: 2}}
-    , {position: {x: 0, y: 3}}
-    , {position: {x: 1, y: 3}}
-  ]
-};
+const {BLOCKS} = CONSTANTS;
+const {CLOCKWISE_ROTATION, CCLOCKWISE_ROTATION} = CONSTANTS.KEYEVENTS;
 
 export function generateRandomBlock(options) {
   const gridHeight = _.get(options, 'gridSize.height') || 4;
@@ -61,12 +40,12 @@ export function cloneTile(tile) {
 }
 
 function generateRandomBlockType() {
-  let blockTypes = Object.keys(CONSTANTS.BLOCK_TYPES);
+  let blockTypes = Object.keys(BLOCKS);
   return blockTypes[Math.floor(Math.random()*blockTypes.length)];
 }
 
 function generateRandomBlockOfType(type) {
-  return cloneBlock(BLOCK_DEFINITIONS[type]);
+  return cloneBlock(BLOCKS[type]);
 }
 
 function rotateRandomly(block) {
@@ -85,8 +64,8 @@ function positionRandomly(block, options) {
 export function translateTile(tile, offsetx = 0, offsety = 0) {
   return _.assign({}, tile, {
     position: {
-      x: _.get(tile, 'position.x') + offsetx
-      , y: _.get(tile, 'position.y') + offsety
+      x: tile.position.x + offsetx
+      , y: tile.position.y + offsety
     }
   });
 }
@@ -109,5 +88,59 @@ function calculateRangeGivenProp(block, prop) {
     return Math.max(currMax, tile.position[prop]);
   }, -Infinity);
   return max - min;
+}
+
+function findCenterPosition(block) {
+    let sumx = block.reduce((currSum, tile) => {
+        return currSum + tile.position.x;
+    }, 0);
+    let sumy = block.reduce((currSum, tile) => {
+        return currSum + tile.position.y;
+    }, 0);
+
+    let blockLength = block.length;
+    let centerPosition = {
+        x: Math.floor(sumx/blockLength),
+        y: Math.ceil(sumy/blockLength)
+    };
+    return centerPosition;
+}
+
+function rotateTileAroundPoint(tile, direction, centerPosition, gridWidth)
+{
+    let originx = tile.position.x - centerPosition.x;
+    let originy = tile.position.y - centerPosition.y;
+    
+    let newx, newy;
+    if (direction === CCLOCKWISE_ROTATION)
+    {
+        newx = originy + centerPosition.x;
+        newy = -originx + centerPosition.y;
+    }
+    else if (direction === CLOCKWISE_ROTATION)
+    {
+        newx = originy + centerPosition.x;
+        newy = originx + centerPosition.y;
+    }
+
+    return {
+        position: {
+            x: newx,
+            y: newy,
+        },
+        value: tile.value
+    };
+}
+
+export function rotateBlock(block, direction, options) {
+    let {gridWidth} = options;
+
+    let centerPosition = findCenterPosition(block);
+
+    let newBlock = block.map((tile) => {
+        return rotateTileAroundPoint(tile, direction, centerPosition, gridWidth);
+    });
+
+    return newBlock;
 }
 

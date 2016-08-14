@@ -75,3 +75,9 @@ export function checkGameState() {
     };
 }
 
+export function toggleGravity() {
+  return {
+    type: TOGGLE_GRAVITY
+  };
+}
+

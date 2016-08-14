@@ -16,6 +16,7 @@ const initialState = {
   , displayGrid: []
   , visibleGrid: []
   , lossFlag: false
+  , gravityFlag: true
 };
 
 
@@ -31,6 +32,7 @@ export default (state = initialState, action) => {
     , SPEED_UP_FALLING_BLOCK: speedUpFallingBlock
     , ELIMINATE_LINES: eliminateLines
     , CHECK_GAME_STATE: checkGameState
+    , TOGGLE_GRAVITY: toggleGravity
   };
 
   let handler = actionMap[action.type];
@@ -131,7 +133,11 @@ function shiftFallingBlock(state, direction) {
 }
 
 function rotateFallingBlock(state, direction) {
-  return state;
+  return _.assign({}, state, {
+    fallingBlock: BlockFactory.rotateBlock(state.fallingBlock, direction, {
+      gridWidth: state.gridSize.width
+    })
+  });
 }
 
 function speedUpFallingBlock(state) {
@@ -225,6 +231,12 @@ function computeGrid(state) {
     grid
     , displayGrid
     , visibleGrid
+  });
+}
+
+function toggleGravity(state) {
+  return _.assign({}, state, {
+    gravityFlag: !state.gravityFlag
   });
 }
 
