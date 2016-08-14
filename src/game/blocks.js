@@ -3,7 +3,7 @@ import CONSTANTS from '../constants';
 
 const {BLOCKS} = CONSTANTS;
 const {CLOCKWISE_ROTATION, CCLOCKWISE_ROTATION} = CONSTANTS.KEYEVENTS;
-
+const {ROTATION_ORIENTATION} = CONSTANTS;
 export function generateRandomBlock(options) {
   const gridHeight = _.get(options, 'gridSize.height') || 4;
   const gridWidth = _.get(options, 'gridSize.width') || 4;
@@ -20,6 +20,7 @@ export function generateRandomBlock(options) {
       , gridWidth
     }
   });
+  // THIS MAKES rotationOrientation disappear!!
   // assign random values to the tiles
   block = block.map((tile) => {
     let value 
@@ -32,7 +33,10 @@ export function generateRandomBlock(options) {
 }
 
 export function cloneBlock(block) {
-  return block.map((tile) => (cloneTile(tile)));
+  let cloneBlock = block.map((tile) => (cloneTile(tile)));
+  cloneBlock["rotationOrientation"] = ROTATION_ORIENTATION.ZERO;
+  debugger;
+  return cloneBlock;
 }
 
 export function cloneTile(tile) {
@@ -90,6 +94,7 @@ function calculateRangeGivenProp(block, prop) {
   return max - min;
 }
 
+
 function findCenterPosition(block) {
     let sumx = block.reduce((currSum, tile) => {
         return currSum + tile.position.x;
@@ -132,7 +137,12 @@ function rotateTileAroundPoint(tile, direction, centerPosition, gridWidth)
     };
 }
 
-export function rotateBlock(block, direction, options) {
+// note: rotationOffset is the offset of the 4x4 box
+export function rotateBlock(block, direction, rotationOffset, options) {
+
+    // Rotation based on http://codeincomplete.com/posts/javascript-tetris/
+
+
     let {gridWidth} = options;
 
     let centerPosition = findCenterPosition(block);
@@ -140,6 +150,10 @@ export function rotateBlock(block, direction, options) {
     let newBlock = block.map((tile) => {
         return rotateTileAroundPoint(tile, direction, centerPosition, gridWidth);
     });
+
+    newBlock["rotationOrientation"] = ROTATION_ORIENTATION.NINETY;
+
+    debugger;
 
     return newBlock;
 }

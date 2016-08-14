@@ -39,6 +39,12 @@ module.exports = {
       , {position: {x:1, y:3}}
     ]
   }
+  , ROTATION_ORIENTATION: {
+    ZERO: 0
+    , NINETY: 90
+    , ONE_EIGHTY: 180
+    , TWO_SEVENTY: 270
+  }
   , DEFAULT_BLOCK: 'LINE'
   , KEYEVENTS: {
     LEFT_SHIFT: 37

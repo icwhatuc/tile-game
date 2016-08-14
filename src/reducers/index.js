@@ -15,6 +15,7 @@ const initialState = {
   , grid: []
   , displayGrid: []
   , visibleGrid: []
+  , rotationOffset: {x:0, y:0}
   , lossFlag: false
   , gravityFlag: true
 };
@@ -133,8 +134,9 @@ function shiftFallingBlock(state, direction) {
 }
 
 function rotateFallingBlock(state, direction) {
+    debugger;
   return _.assign({}, state, {
-    fallingBlock: BlockFactory.rotateBlock(state.fallingBlock, direction, {
+    fallingBlock: BlockFactory.rotateBlock(state.fallingBlock, direction, state.rotationOffset, {
       gridWidth: state.gridSize.width
     })
   });
