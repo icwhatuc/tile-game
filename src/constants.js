@@ -67,6 +67,9 @@ module.exports = {
       ]
     ]
   }
+  , BLOCK_ROTATION_OFFSETS: {
+    LBLOCK: {x:0, y:1}
+  }
   , ROTATION_ORIENTATION: {
     ZERO: 0
     , NINETY: 1

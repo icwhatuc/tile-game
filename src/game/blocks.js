@@ -3,6 +3,7 @@ import CONSTANTS from '../constants';
 
 const {BLOCKS} = CONSTANTS;
 const {BLOCK_ROTATIONS} = CONSTANTS;
+const {BLOCK_ROTATION_OFFSETS} = CONSTANTS;
 const {CLOCKWISE_ROTATION, CCLOCKWISE_ROTATION} = CONSTANTS.KEYEVENTS;
 const {ROTATION_ORIENTATION} = CONSTANTS;
 export function generateRandomBlock(options) {
@@ -36,10 +37,12 @@ export function generateRandomBlock(options) {
 
     debugger;
 
+  let rotationOffset = _.assign({}, BLOCK_ROTATION_OFFSETS[randomBlockType]);
+
   return {
       block: block,
       blockProperties: {
-          rotationOffset: {x:0, y:1} // TODO - have offset for position randomly and for different blocks
+          rotationOffset: rotationOffset
           , rotationOrientation: ROTATION_ORIENTATION.ZERO
           , type: randomBlockType
       }
@@ -48,7 +51,6 @@ export function generateRandomBlock(options) {
 
 export function cloneBlock(block) {
   let cloneBlock = block.map((tile) => (cloneTile(tile)));
-  debugger;
   return cloneBlock;
 }
 
@@ -107,49 +109,6 @@ function calculateRangeGivenProp(block, prop) {
   return max - min;
 }
 
-
-function findCenterPosition(block) {
-    let sumx = block.reduce((currSum, tile) => {
-        return currSum + tile.position.x;
-    }, 0);
-    let sumy = block.reduce((currSum, tile) => {
-        return currSum + tile.position.y;
-    }, 0);
-
-    let blockLength = block.length;
-    let centerPosition = {
-        x: Math.floor(sumx/blockLength),
-        y: Math.ceil(sumy/blockLength)
-    };
-    return centerPosition;
-}
-
-function rotateTileAroundPoint(tile, direction, centerPosition, gridWidth)
-{
-    let originx = tile.position.x - centerPosition.x;
-    let originy = tile.position.y - centerPosition.y;
-    
-    let newx, newy;
-    if (direction === CCLOCKWISE_ROTATION)
-    {
-        newx = originy + centerPosition.x;
-        newy = -originx + centerPosition.y;
-    }
-    else if (direction === CLOCKWISE_ROTATION)
-    {
-        newx = originy + centerPosition.x;
-        newy = originx + centerPosition.y;
-    }
-
-    return {
-        position: {
-            x: newx,
-            y: newy,
-        },
-        value: tile.value
-    };
-}
-
 // note: rotationOffset is the offset of the 4x4 box
 export function rotateBlock(block, direction, blockProperties, options) {
 
@@ -158,13 +117,6 @@ export function rotateBlock(block, direction, blockProperties, options) {
 
     let {gridWidth} = options;
     let {type, rotationOrientation, rotationOffset} = blockProperties;
-
-    debugger;
-    /*
-    let newBlock = block.map((tile) => {
-        return rotateTileAroundPoint(tile, direction, centerPosition, gridWidth);
-    });
-    */
 
     // may have to refactor in the future if we want to rotate other blocks
     // IDEA for an item: be able to select any block and re place it! - will
@@ -211,7 +163,6 @@ export function rotateBlock(block, direction, blockProperties, options) {
     let length = rotationsForBlock.length;
     let newBlock = block; // TODO need to deep copy??
 
-    debugger;
     for (let i=0; i<length; ++i)
     {
         newBlock[i].position.x = rotationsForBlock[i].position.x + rotationOffset.x;

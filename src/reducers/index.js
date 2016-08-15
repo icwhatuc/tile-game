@@ -56,7 +56,6 @@ function tick(state) {
 
 // This is only called once upon startup of the game
 function generateFallingBlock(state) {
-    debugger;
   let randomBlockObject = BlockFactory.generateRandomBlock({
       gridSize:state.gridSize
   });
@@ -97,6 +96,7 @@ function applyGravity(state) {
   }, true);
 
   if(!isValidPosition) {
+  debugger;
     blocks = blocks.concat([fallingBlock]);
     // TODO - call the function above to generate a random block
     let randomBlockObject = BlockFactory.generateRandomBlock({gridSize});
@@ -106,7 +106,6 @@ function applyGravity(state) {
   else {
     fallingBlock = updatedFallingBlock;
   }
-
   return _.assign({}, state, {fallingBlock, fallingBlockProperties, blocks});
 }
 
@@ -155,7 +154,6 @@ function shiftFallingBlock(state, direction) {
 }
 
 function rotateFallingBlock(state, direction) {
-    debugger;
   return _.assign({}, state, 
     BlockFactory.rotateBlock(state.fallingBlock, 
                                direction, 
