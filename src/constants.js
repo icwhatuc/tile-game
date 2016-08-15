@@ -33,17 +33,45 @@ module.exports = {
       , {position: {x: 1, y: 3}}
     ]
     , */ LBLOCK: [
-      {position: {x:0, y:1}}
-      , {position: {x:0, y:2}}
-      , {position: {x:0, y:3}}
+      {position: {x:1, y:1}}
+      , {position: {x:1, y:2}}
       , {position: {x:1, y:3}}
+      , {position: {x:2, y:3}}
+    ]
+  }
+  , BLOCK_ROTATIONS: {
+    LBLOCK: [
+      [
+        {position: {x:1, y:1}}
+        , {position: {x:1, y:2}}
+        , {position: {x:1, y:3}}
+        , {position: {x:2, y:3}}
+      ]
+      , [
+        {position: {x:2, y:2}}
+        , {position: {x:1, y:2}}
+        , {position: {x:0, y:2}}
+        , {position: {x:0, y:3}}
+      ]
+      , [
+        {position: {x:1, y:3}}
+        , {position: {x:1, y:2}}
+        , {position: {x:1, y:1}}
+        , {position: {x:0, y:1}}
+      ]
+      , [
+        {position: {x:0, y:2}}
+        , {position: {x:1, y:2}}
+        , {position: {x:2, y:2}}
+        , {position: {x:2, y:1}}
+      ]
     ]
   }
   , ROTATION_ORIENTATION: {
     ZERO: 0
-    , NINETY: 90
-    , ONE_EIGHTY: 180
-    , TWO_SEVENTY: 270
+    , NINETY: 1
+    , ONE_EIGHTY: 2
+    , TWO_SEVENTY: 3
   }
   , DEFAULT_BLOCK: 'LINE'
   , KEYEVENTS: {

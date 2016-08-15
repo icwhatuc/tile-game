@@ -8,6 +8,8 @@ export function constructEmptyGrid(gridHeight, gridWidth) {
 export function constructGrid(gridHeight, gridWidth, blocks, options = {}) {
   let grid = constructEmptyGrid(gridHeight, gridWidth);
   blocks.forEach((block, blockIdx) => {
+      console.log("HERE");
+      console.log(block);
     block.forEach((tile) => {
       grid[tile.position.y][tile.position.x] = options.assignValues ?
         tile.value : blockIdx;

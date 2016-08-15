@@ -15,7 +15,11 @@ const initialState = {
   , grid: []
   , displayGrid: []
   , visibleGrid: []
-  , rotationOffset: {x:0, y:0}
+  , fallingBlockProperties: {
+    type: "", 
+    rotationOffset: {x:0, y:0}, 
+    rotationOrientation: CONSTANTS.ROTATION_ORIENTATION.ZERO
+  }
   , lossFlag: false
   , gravityFlag: true
 };
@@ -50,11 +54,17 @@ function tick(state) {
   });
 }
 
+// This is only called once upon startup of the game
 function generateFallingBlock(state) {
+    debugger;
+  let randomBlockObject = BlockFactory.generateRandomBlock({
+      gridSize:state.gridSize
+  });
+  let fallingBlock = randomBlockObject.block;
+  let fallingBlockProperties = randomBlockObject.blockProperties;
   return _.assign({}, state, {
-    fallingBlock: BlockFactory.generateRandomBlock({
-      gridSize: state.gridSize
-    })
+    fallingBlock: fallingBlock,
+    fallingBlockProperties: fallingBlockProperties
   });
 }
 
@@ -66,10 +76,14 @@ function applyGravity(state) {
   // update it's position, add it to existing list of blocks,
   // and generate a new falling block
   let gravityStrength = 1;
-  let {grid, fallingBlock, blocks, gridSize} = state;
+  let {grid, fallingBlock, fallingBlockProperties, blocks, gridSize} = state;
   let updatedFallingBlock = fallingBlock.map((tile) => {
     return BlockFactory.translateTile(tile, undefined, gravityStrength);
   });
+
+  // also adjust the rotation offset region
+  fallingBlockProperties.rotationOffset.y += gravityStrength;
+
   let isValidPosition = updatedFallingBlock.reduce((check, tile) => {
     let isOccupied = _.get(grid, [tile.position.y, tile.position.x]) > 0;
     return check
@@ -84,35 +98,41 @@ function applyGravity(state) {
 
   if(!isValidPosition) {
     blocks = blocks.concat([fallingBlock]);
-    fallingBlock = BlockFactory.generateRandomBlock({gridSize});
+    // TODO - call the function above to generate a random block
+    let randomBlockObject = BlockFactory.generateRandomBlock({gridSize});
+    fallingBlock = randomBlockObject.block;
+    fallingBlockProperties = randomBlockObject.blockProperties;
   }
   else {
     fallingBlock = updatedFallingBlock;
   }
 
-  return _.assign({}, state, {fallingBlock, blocks});
+  return _.assign({}, state, {fallingBlock, fallingBlockProperties, blocks});
 }
 
 function shiftFallingBlock(state, direction) {
-  let {grid, fallingBlock, gridSize} = state;
+  let {grid, fallingBlock, fallingBlockProperties, gridSize} = state;
   let updatedFallingBlock;
-  
+  let updatedFallingBlockProperties = _.assign({}, fallingBlockProperties);
   // TODO: check for edge cases
   switch(direction) {
     case CONSTANTS.KEYEVENTS.LEFT_SHIFT:
       updatedFallingBlock = fallingBlock.map((tile) => {
         return BlockFactory.translateTile(tile, -1, undefined);
       });
+      updatedFallingBlockProperties.rotationOffset.x -= 1;
       break;
     case CONSTANTS.KEYEVENTS.RIGHT_SHIFT:
       updatedFallingBlock = fallingBlock.map((tile) => {
         return BlockFactory.translateTile(tile, 1, undefined);
       });
+      updatedFallingBlockProperties.rotationOffset.x += 1;
       break;
     case CONSTANTS.KEYEVENTS.DOWN_SHIFT:
       updatedFallingBlock = fallingBlock.map((tile) => {
         return BlockFactory.translateTile(tile, undefined, 1);
       });
+      updatedFallingBlockProperties.rotationOffset.y += 1;
       break;
   };
 
@@ -130,16 +150,20 @@ function shiftFallingBlock(state, direction) {
 
   return isValidPosition ? _.assign({}, state, {
     fallingBlock: updatedFallingBlock
+    , fallingBlockProperties: updatedFallingBlockProperties
   }) : state;
 }
 
 function rotateFallingBlock(state, direction) {
     debugger;
-  return _.assign({}, state, {
-    fallingBlock: BlockFactory.rotateBlock(state.fallingBlock, direction, state.rotationOffset, {
-      gridWidth: state.gridSize.width
-    })
-  });
+  return _.assign({}, state, 
+    BlockFactory.rotateBlock(state.fallingBlock, 
+                               direction, 
+                               state.fallingBlockProperties, 
+                               {
+                                  gridWidth: state.gridSize.width
+                               })
+  );
 }
 
 function speedUpFallingBlock(state) {

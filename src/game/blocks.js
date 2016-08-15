@@ -2,6 +2,7 @@ import _ from 'lodash';
 import CONSTANTS from '../constants';
 
 const {BLOCKS} = CONSTANTS;
+const {BLOCK_ROTATIONS} = CONSTANTS;
 const {CLOCKWISE_ROTATION, CCLOCKWISE_ROTATION} = CONSTANTS.KEYEVENTS;
 const {ROTATION_ORIENTATION} = CONSTANTS;
 export function generateRandomBlock(options) {
@@ -10,17 +11,21 @@ export function generateRandomBlock(options) {
   const gridHiddenHeight = _.get(options, 'gridSize.hidden') || 4;
   
   // generate a random block type
-  let block = generateRandomBlockOfType(generateRandomBlockType());
+  let randomBlockType = generateRandomBlockType();
+  let block = generateRandomBlockOfType(randomBlockType);
   // generate a configuration - rotation + position
   // rotation + position must be such that at least one tile
   block = rotateRandomly(block);
+
+  /* TODO put back
   block = positionRandomly(block, {
     gridSize: {
       gridHeight: gridHiddenHeight
       , gridWidth
     }
   });
-  // THIS MAKES rotationOrientation disappear!!
+  */
+
   // assign random values to the tiles
   block = block.map((tile) => {
     let value 
@@ -29,12 +34,20 @@ export function generateRandomBlock(options) {
     });
   });
 
-  return block;
+    debugger;
+
+  return {
+      block: block,
+      blockProperties: {
+          rotationOffset: {x:0, y:1} // TODO - have offset for position randomly and for different blocks
+          , rotationOrientation: ROTATION_ORIENTATION.ZERO
+          , type: randomBlockType
+      }
+  };
 }
 
 export function cloneBlock(block) {
   let cloneBlock = block.map((tile) => (cloneTile(tile)));
-  cloneBlock["rotationOrientation"] = ROTATION_ORIENTATION.ZERO;
   debugger;
   return cloneBlock;
 }
@@ -138,23 +151,80 @@ function rotateTileAroundPoint(tile, direction, centerPosition, gridWidth)
 }
 
 // note: rotationOffset is the offset of the 4x4 box
-export function rotateBlock(block, direction, rotationOffset, options) {
+export function rotateBlock(block, direction, blockProperties, options) {
 
     // Rotation based on http://codeincomplete.com/posts/javascript-tetris/
 
 
     let {gridWidth} = options;
+    let {type, rotationOrientation, rotationOffset} = blockProperties;
 
-    let centerPosition = findCenterPosition(block);
-
+    debugger;
+    /*
     let newBlock = block.map((tile) => {
         return rotateTileAroundPoint(tile, direction, centerPosition, gridWidth);
     });
+    */
 
-    newBlock["rotationOrientation"] = ROTATION_ORIENTATION.NINETY;
+    // may have to refactor in the future if we want to rotate other blocks
+    // IDEA for an item: be able to select any block and re place it! - will
+
+    let newOrientation;
+    switch(blockProperties.rotationOrientation){
+        case ROTATION_ORIENTATION.ZERO:
+            if (direction === CCLOCKWISE_ROTATION){
+                newOrientation = ROTATION_ORIENTATION.TWO_SEVENTY;
+            }
+            else{
+                newOrientation = ROTATION_ORIENTATION.NINETY;
+            }
+            break;
+        case ROTATION_ORIENTATION.NINETY:
+            if (direction === CCLOCKWISE_ROTATION){
+                newOrientation = ROTATION_ORIENTATION.ZERO;
+            }
+            else{
+                newOrientation = ROTATION_ORIENTATION.ONE_EIGHTY;
+            }
+            break;
+        case ROTATION_ORIENTATION.ONE_EIGHTY:
+            if (direction === CCLOCKWISE_ROTATION){
+                newOrientation = ROTATION_ORIENTATION.NINETY;
+            }
+            else{
+                newOrientation = ROTATION_ORIENTATION.TWO_SEVENTY;
+            }
+            break;
+        case ROTATION_ORIENTATION.TWO_SEVENTY:
+            if (direction === CCLOCKWISE_ROTATION){
+                newOrientation = ROTATION_ORIENTATION.ONE_EIGHTY;
+            }
+            else{
+                newOrientation = ROTATION_ORIENTATION.ZERO;
+            }
+            break;
+        default:
+            console.log("ERROR");
+    }
+    let rotationsForBlock = BLOCK_ROTATIONS[type][newOrientation];
+
+    let length = rotationsForBlock.length;
+    let newBlock = block; // TODO need to deep copy??
 
     debugger;
+    for (let i=0; i<length; ++i)
+    {
+        newBlock[i].position.x = rotationsForBlock[i].position.x + rotationOffset.x;
+        newBlock[i].position.y = rotationsForBlock[i].position.y + rotationOffset.y;
+    }
 
-    return newBlock;
+    return {
+        fallingBlock: newBlock,
+        fallingBlockProperties: {
+            rotationOffset: blockProperties.rotationOffset,
+            rotationOrientation: newOrientation,
+            type: type
+        }
+    };
 }
 
