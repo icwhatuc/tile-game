@@ -8,8 +8,11 @@ const {
   , ROTATE_FALLING_BLOCK
   , SPEED_UP_FALLING_BLOCK
   , ELIMINATE_LINES
+  , STORE_INTERVAL
   , CHECK_GAME_STATE
 } = CONSTANTS.MECHANICS;
+
+const {INTERVAL_PERIOD_STEP_SIZE} = CONSTANTS;
 
 // TODO: remove
 export function setGrid(grid) {
@@ -66,6 +69,68 @@ export function speedUpFallingBlock() {
 export function eliminateLines() {
     return {
         type: ELIMINATE_LINES
+    };
+}
+
+export function startTime() {
+    return (dispatch, getState) => {
+        let state = getState();
+        let intervalId = setInterval(() => {
+            dispatch(tick());
+        }, state.intervalPeriod);
+        dispatch({
+            type: STORE_INTERVAL
+            , data: {
+                intervalId
+            }
+        });
+    };
+}
+
+export function stopTime() {
+    return (dispatch, getState) => {
+        let state = getState();
+        if(state.intervalId) {
+          clearInterval(state.intervalId);
+        }
+        dispatch({
+            type: STORE_INTERVAL
+            , data: {
+                intervalId: null
+            }
+        });
+    };
+}
+
+export function speedUpTime() {
+    return changeTime(-INTERVAL_PERIOD_STEP_SIZE);
+}
+
+export function slowDownTime() {
+    return changeTime(INTERVAL_PERIOD_STEP_SIZE);
+}
+
+export function changeTime(stepSize) {
+    return (dispatch, getState) => {
+        let state = getState();
+        let intervalPeriod = state.intervalPeriod + stepSize;
+        let intervalId = state.intervalId;
+        
+        if(intervalId) {
+          clearInterval(intervalId);
+        }
+
+        intervalId = setInterval(() => {
+            dispatch(tick());
+        }, intervalPeriod);
+        
+        dispatch({
+            type: STORE_INTERVAL
+            , data: {
+                intervalId
+                , intervalPeriod
+            }
+        });
     };
 }
 

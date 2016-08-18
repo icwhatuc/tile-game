@@ -16,6 +16,8 @@ const initialState = {
   , displayGrid: []
   , visibleGrid: []
   , lossFlag: false
+  , intervalId: null
+  , intervalPeriod: 1000
 };
 
 
@@ -31,6 +33,7 @@ export default (state = initialState, action) => {
     , SPEED_UP_FALLING_BLOCK: speedUpFallingBlock
     , ELIMINATE_LINES: eliminateLines
     , CHECK_GAME_STATE: checkGameState
+    , STORE_INTERVAL: storeInterval
   };
 
   let handler = actionMap[action.type];
@@ -186,6 +189,10 @@ function eliminateLines(state) {
   return _.assign({}, state, {
     blocks: updatedBlocks
   });
+}
+
+function storeInterval(state, data) {
+  return _.assign({}, state, data);
 }
 
 function checkGameState(state) {
