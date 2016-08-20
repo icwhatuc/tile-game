@@ -96,7 +96,6 @@ function applyGravity(state) {
   }, true);
 
   if(!isValidPosition) {
-  debugger;
     blocks = blocks.concat([fallingBlock]);
     // TODO - call the function above to generate a random block
     let randomBlockObject = BlockFactory.generateRandomBlock({gridSize});

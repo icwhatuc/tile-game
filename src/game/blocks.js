@@ -35,8 +35,6 @@ export function generateRandomBlock(options) {
     });
   });
 
-    debugger;
-
   let rotationOffset = _.assign({}, BLOCK_ROTATION_OFFSETS[randomBlockType]);
 
   return {
@@ -121,53 +119,28 @@ export function rotateBlock(block, direction, blockProperties, options) {
     // may have to refactor in the future if we want to rotate other blocks
     // IDEA for an item: be able to select any block and re place it! - will
 
-    let newOrientation;
-    switch(blockProperties.rotationOrientation){
-        case ROTATION_ORIENTATION.ZERO:
-            if (direction === CCLOCKWISE_ROTATION){
-                newOrientation = ROTATION_ORIENTATION.TWO_SEVENTY;
+    let orderedOrientations = Object.keys(ROTATION_ORIENTATION)
+        .sort((a, b) => (ROTATION_ORIENTATION[a] - ROTATION_ORIENTATION[b]))
+        .map((orientationName) => (ROTATION_ORIENTATION[orientationName]));
+
+    let newOrientation = orderedOrientations.reduce((prev, orientation, index) => {
+            if(orientation === blockProperties.rotationOrientation) {
+                return direction === CLOCKWISE_ROTATION ?
+                    orderedOrientations[(index + 1 + 4)%4] :
+                    orderedOrientations[(index - 1 + 4)%4];
             }
-            else{
-                newOrientation = ROTATION_ORIENTATION.NINETY;
-            }
-            break;
-        case ROTATION_ORIENTATION.NINETY:
-            if (direction === CCLOCKWISE_ROTATION){
-                newOrientation = ROTATION_ORIENTATION.ZERO;
-            }
-            else{
-                newOrientation = ROTATION_ORIENTATION.ONE_EIGHTY;
-            }
-            break;
-        case ROTATION_ORIENTATION.ONE_EIGHTY:
-            if (direction === CCLOCKWISE_ROTATION){
-                newOrientation = ROTATION_ORIENTATION.NINETY;
-            }
-            else{
-                newOrientation = ROTATION_ORIENTATION.TWO_SEVENTY;
-            }
-            break;
-        case ROTATION_ORIENTATION.TWO_SEVENTY:
-            if (direction === CCLOCKWISE_ROTATION){
-                newOrientation = ROTATION_ORIENTATION.ONE_EIGHTY;
-            }
-            else{
-                newOrientation = ROTATION_ORIENTATION.ZERO;
-            }
-            break;
-        default:
-            console.log("ERROR");
-    }
+            return prev;
+        }, undefined);
+    
     let rotationsForBlock = BLOCK_ROTATIONS[type][newOrientation];
-
-    let length = rotationsForBlock.length;
-    let newBlock = block; // TODO need to deep copy??
-
-    for (let i=0; i<length; ++i)
-    {
-        newBlock[i].position.x = rotationsForBlock[i].position.x + rotationOffset.x;
-        newBlock[i].position.y = rotationsForBlock[i].position.y + rotationOffset.y;
-    }
+    let newBlock = block.map((tile, index) => {
+        return _.assign({}, tile, {
+            position: {
+                x: rotationsForBlock[index].position.x + rotationOffset.x
+                , y: rotationsForBlock[index].position.y + rotationOffset.y
+            }
+        });
+    });
 
     return {
         fallingBlock: newBlock,
