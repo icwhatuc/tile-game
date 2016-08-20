@@ -27,9 +27,12 @@ export function generateFallingBlock() {
 }
 
 export function tick() {
-  return (dispatch) => {
+  return (dispatch, getState) => {
+    let state = getState();
     dispatch({type: TICK});
-    dispatch(applyGravityToFallingBlock());
+    if(state.gravityFlag) {
+        dispatch(applyGravityToFallingBlock());
+    }
     dispatch(eliminateLines());
     dispatch(checkGameState());
   };
