@@ -16,6 +16,7 @@ const initialState = {
   , displayGrid: []
   , visibleGrid: []
   , lossFlag: false
+  , score: 100
 };
 
 
