@@ -16,7 +16,7 @@ const initialState = {
   , displayGrid: []
   , visibleGrid: []
   , lossFlag: false
-  , score: 100
+  , score: 0
 };
 
 
@@ -186,6 +186,7 @@ function eliminateLines(state) {
 
   return _.assign({}, state, {
     blocks: updatedBlocks
+    , score: state.score + Object.keys(rowsToEliminate).length
   });
 }
 
