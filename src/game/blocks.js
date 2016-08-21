@@ -1,59 +1,52 @@
 import _ from 'lodash';
 import CONSTANTS from '../constants';
 
-const {
-  LINE
-  , SQUARE
-} = CONSTANTS.BLOCK_TYPES;
-const {DEFAULT_BLOCK} = CONSTANTS;
-
-/*
- * definitions assume a 4 by 4 grid
- */
-const BLOCK_DEFINITIONS = {
-  LINE: [
-    {position: {x: 0, y: 0}}
-    , {position: {x: 0, y: 1}}
-    , {position: {x: 0, y: 2}}
-    , {position: {x: 0, y: 3}}
-  ]
-  , SQUARE: [
-    {position: {x: 0, y: 2}}
-    , {position: {x: 1, y: 2}}
-    , {position: {x: 0, y: 3}}
-    , {position: {x: 1, y: 3}}
-  ]
-};
-
+const {BLOCKS} = CONSTANTS;
+const {BLOCK_ROTATIONS} = CONSTANTS;
+const {BLOCK_ROTATION_OFFSETS} = CONSTANTS;
+const {CLOCKWISE_ROTATION, CCLOCKWISE_ROTATION} = CONSTANTS.KEYEVENTS;
+const {ROTATION_ORIENTATION} = CONSTANTS;
 export function generateRandomBlock(options) {
   const gridHeight = _.get(options, 'gridSize.height') || 4;
   const gridWidth = _.get(options, 'gridSize.width') || 4;
   const gridHiddenHeight = _.get(options, 'gridSize.hidden') || 4;
   
   // generate a random block type
-  let block = generateRandomBlockOfType(generateRandomBlockType());
-  // generate a configuration - rotation + position
-  // rotation + position must be such that at least one tile
-  block = rotateRandomly(block);
-  block = positionRandomly(block, {
+  let type = generateRandomBlockType();
+  let block = generateRandomBlockOfType(type);
+  let orientation = generateRandomOrientation();
+
+  let randomXOffset = getRandomXOffset(block, {
     gridSize: {
       gridHeight: gridHiddenHeight
       , gridWidth
     }
   });
-  // assign random values to the tiles
-  block = block.map((tile) => {
-    let value 
-    return _.assign({}, tile, {
-      value: Math.random() < 0.9 ? 2 : 4
-    });
+  let offset = _.assign({}, {
+    x: BLOCK_ROTATION_OFFSETS[type].x + randomXOffset
+    , y: BLOCK_ROTATION_OFFSETS[type].y
   });
 
-  return block;
+  // position randomly
+  block = block.map((tile) => (translateTile(tile, randomXOffset, 0)));
+
+  // assign random values to the tiles
+  block = block.map((tile) => {
+    return _.assign({}, tile, {
+      value: Math.random() < 0.9 ? 2 : 4 // TODO: hardcoded constants
+    });
+  });
+  
+  return applyOrientation({
+    tiles: block
+    , offset
+    , type
+  }, orientation);
 }
 
 export function cloneBlock(block) {
-  return block.map((tile) => (cloneTile(tile)));
+  let cloneBlock = block.map((tile) => (cloneTile(tile)));
+  return cloneBlock;
 }
 
 export function cloneTile(tile) {
@@ -61,32 +54,31 @@ export function cloneTile(tile) {
 }
 
 function generateRandomBlockType() {
-  let blockTypes = Object.keys(CONSTANTS.BLOCK_TYPES);
+  let blockTypes = Object.keys(BLOCKS);
   return blockTypes[Math.floor(Math.random()*blockTypes.length)];
 }
 
 function generateRandomBlockOfType(type) {
-  return cloneBlock(BLOCK_DEFINITIONS[type]);
+  return cloneBlock(BLOCKS[type]);
 }
 
-function rotateRandomly(block) {
-  // TODO
-  return block;
+function generateRandomOrientation() {
+  let orientations = _.values(ROTATION_ORIENTATION); 
+  return orientations[Math.floor(Math.random()*orientations.length)];
 }
 
-function positionRandomly(block, options) {
+function getRandomXOffset(block, options) {
   let {gridWidth} = options.gridSize;
   let blockWidth = calculateBlockWidth(block);
   let validXRange = gridWidth - blockWidth;
-  let offset = Math.floor(Math.random()*validXRange);
-  return block.map((tile) => (translateTile(tile, offset, undefined)));
+  return Math.floor(Math.random()*validXRange);
 }
 
 export function translateTile(tile, offsetx = 0, offsety = 0) {
   return _.assign({}, tile, {
     position: {
-      x: _.get(tile, 'position.x') + offsetx
-      , y: _.get(tile, 'position.y') + offsety
+      x: tile.position.x + offsetx
+      , y: tile.position.y + offsety
     }
   });
 }
@@ -109,5 +101,47 @@ function calculateRangeGivenProp(block, prop) {
     return Math.max(currMax, tile.position[prop]);
   }, -Infinity);
   return max - min;
+}
+
+// note: rotationOffset is the offset of the 4x4 box
+export function rotateBlock(block, direction, options) {
+
+    // Rotation based on http://codeincomplete.com/posts/javascript-tetris/
+
+
+    let {gridWidth} = options;
+    let {type, orientation, offset} = block;
+
+    // may have to refactor in the future if we want to rotate other blocks
+    // IDEA for an item: be able to select any block and re place it! - will
+
+    let orderedOrientations = _.values(ROTATION_ORIENTATION)
+        .sort((a, b) => (a - b));
+    let updatedOrientation = orderedOrientations.find((o, index) => {
+        let prevOrientation = orderedOrientations[(index - 1 + 4) % orderedOrientations.length];
+        let nextOrientation = orderedOrientations[(index + 1 + 4) % orderedOrientations.length];
+
+        return direction === CLOCKWISE_ROTATION && prevOrientation === orientation
+          || direction === CCLOCKWISE_ROTATION && nextOrientation === orientation;
+
+    });
+    
+    return applyOrientation(block, updatedOrientation);
+}
+
+export function applyOrientation(block, updatedOrientation) {
+    let {type, offset} = block;
+    let rotationsForBlock = BLOCK_ROTATIONS[type][updatedOrientation];
+    return _.assign({}, block, {
+      tiles: block.tiles.map((tile, index) => {
+        return _.assign({}, tile, {
+            position: {
+                x: rotationsForBlock[index].position.x + offset.x
+                , y: rotationsForBlock[index].position.y + offset.y
+            }
+        });
+      })
+      , orientation: updatedOrientation
+    });
 }
 

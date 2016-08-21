@@ -10,6 +10,9 @@ const {
   LEFT_SHIFT
   , RIGHT_SHIFT
   , DOWN_SHIFT
+  , CLOCKWISE_ROTATION
+  , CCLOCKWISE_ROTATION
+  , TOGGLE_GRAVITY
 } = CONSTANTS.KEYEVENTS;
 
 class App extends React.Component {
@@ -28,6 +31,15 @@ class App extends React.Component {
         break;
       case DOWN_SHIFT:
         this.props.dispatch(actions.shiftFallingBlock(DOWN_SHIFT));
+        break;
+      case CLOCKWISE_ROTATION:
+        this.props.dispatch(actions.rotateFallingBlock(CLOCKWISE_ROTATION));
+        break;
+      case CCLOCKWISE_ROTATION:
+        this.props.dispatch(actions.rotateFallingBlock(CCLOCKWISE_ROTATION));
+        break;
+      case TOGGLE_GRAVITY:
+        this.props.dispatch(actions.toggleGravity());
         break;
     };
   }
