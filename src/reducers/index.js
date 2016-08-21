@@ -226,12 +226,17 @@ function checkGameState(state) {
         return rowCheck || cellValue > 0;
       }, false);
   }, false);
-  return updatedLossFlag ?_.assign({}, state, {
+  return updatedLossFlag ? _.assign({}, state, {
     grid: []
     , visibleGrid: []
     , displayGrid: []
     , blocks: []
-    , fallingBlock: []
+    , fallingBlock: {
+      tiles: []
+      , type: null
+      , offset: {x:0, y:0}
+      , orientation: CONSTANTS.ROTATION_ORIENTATION.ZERO
+    }
     , lossFlag: true
   }) : state;
 }
