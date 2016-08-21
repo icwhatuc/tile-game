@@ -21,6 +21,8 @@ const initialState = {
   , displayGrid: []
   , visibleGrid: []
   , lossFlag: false
+  , intervalId: null
+  , intervalPeriod: 1000
   , gravityFlag: true
   , score: 0
 };
@@ -38,6 +40,7 @@ export default (state = initialState, action) => {
     , SPEED_UP_FALLING_BLOCK: speedUpFallingBlock
     , ELIMINATE_LINES: eliminateLines
     , CHECK_GAME_STATE: checkGameState
+    , STORE_INTERVAL: storeInterval
     , TOGGLE_GRAVITY: toggleGravity
   };
 
@@ -218,6 +221,10 @@ function eliminateLines(state) {
     blocks: updatedBlocks
     , score: computeNewScore(state, Object.keys(rowsToEliminate).length)
   });
+}
+
+function storeInterval(state, data) {
+  return _.assign({}, state, data);
 }
 
 function checkGameState(state) {
