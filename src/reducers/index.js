@@ -84,17 +84,7 @@ function applyGravity(state) {
   });
 
 
-  let isValidPosition = updatedFallingBlock.tiles.reduce((check, tile) => {
-    let isOccupied = _.get(grid, [tile.position.y, tile.position.x]) > 0;
-    return check
-      // grid check
-      && tile.position.y < gridSize.height
-      && tile.position.y >= 0
-      && tile.position.x < gridSize.width
-      && tile.position.x >= 0
-      // occupied check
-      && !isOccupied;
-  }, true);
+  let isValidPosition = isValidPositionForFallingBlock(state, updatedFallingBlock);
 
   if(!isValidPosition) {
     blocks = blocks.concat([fallingBlock.tiles]);
@@ -147,17 +137,7 @@ function shiftFallingBlock(state, direction) {
       break;
   };
 
-  let isValidPosition = updatedFallingBlock.tiles.reduce((check, tile) => {
-    let isOccupied = _.get(grid, [tile.position.y, tile.position.x]) > 0;
-    return check
-      // grid check
-      && tile.position.y < gridSize.height
-      && tile.position.y >= 0
-      && tile.position.x < gridSize.width
-      && tile.position.x >= 0
-      // occupied check
-      && !isOccupied;
-  }, true);
+  let isValidPosition = isValidPositionForFallingBlock(state, updatedFallingBlock);
 
   return isValidPosition ? _.assign({}, state, {
     fallingBlock: updatedFallingBlock
@@ -165,14 +145,23 @@ function shiftFallingBlock(state, direction) {
 }
 
 function rotateFallingBlock(state, direction) {
-  return _.assign({}, state, {
-    fallingBlock: BlockFactory.rotateBlock(
-      state.fallingBlock
-      , direction
-      , {
-        gridWidth: state.gridSize.width
-      })
-  });
+  let gridWidth = state.gridSize.width;
+  let gridHeight = state.gridSize.height;
+  let updatedFallingBlock = BlockFactory.rotateBlock(
+    state.fallingBlock
+    , direction
+    , {
+      gridWidth
+    });
+  
+  // shift IF necessary
+  updatedFallingBlock = shiftFallingBlockIntoGrid(updatedFallingBlock, gridWidth, gridHeight);
+
+  let isValidPosition = isValidPositionForFallingBlock(state, updatedFallingBlock);
+
+  return isValidPosition ? _.assign({}, state, {
+    fallingBlock: updatedFallingBlock
+  }) : state;
 }
 
 function speedUpFallingBlock(state) {
@@ -273,5 +262,56 @@ function toggleGravity(state) {
   return _.assign({}, state, {
     gravityFlag: !state.gravityFlag
   });
+}
+
+function shiftFallingBlockIntoGrid(updatedFallingBlock, gridWidth, gridHeight) {
+  let minX = updatedFallingBlock.tiles.reduce((min, tile) => {
+    return tile.position.x < min ? tile.position.x : min;
+  }, Infinity);
+  let maxX = updatedFallingBlock.tiles.reduce((max, tile) => {
+    return tile.position.x > max ? tile.position.x : max;
+  }, -Infinity);
+  let maxY = updatedFallingBlock.tiles.reduce((max, tile) => {
+    return tile.position.y > max ? tile.position.y : max;
+  }, -Infinity);
+  let offsetX = 0, offsetY = 0;
+
+  if(minX < 0) {
+    offsetX = -(minX);
+  }
+  else if(maxX >= gridWidth) {
+    offsetX = maxX-gridWidth-1;
+  }
+
+  if(maxY >= gridHeight) {
+    offsetY = maxY-gridHeight-1;
+  }
+  
+  if(offsetX || offsetY) {
+    updatedFallingBlock = _.assign({}, updatedFallingBlock, {
+      tiles: updatedFallingBlock.tiles.map((tile) => (BlockFactory.translateTile(tile, offsetX, offsetY)))
+      , offset: {
+        x: updatedFallingBlock.offset.x + offsetX
+        , y: updatedFallingBlock.offset.y + offsetY
+      }
+    });
+  }
+
+  return updatedFallingBlock;
+}
+
+function isValidPositionForFallingBlock(state, updatedFallingBlock) {
+  let {grid, gridSize} = state;
+  return updatedFallingBlock.tiles.reduce((check, tile) => {
+    let isOccupied = _.get(grid, [tile.position.y, tile.position.x]) > 0;
+    return check
+      // grid check
+      && tile.position.y < gridSize.height
+      && tile.position.y >= 0
+      && tile.position.x < gridSize.width
+      && tile.position.x >= 0
+      // occupied check
+      && !isOccupied;
+  }, true);
 }
 
