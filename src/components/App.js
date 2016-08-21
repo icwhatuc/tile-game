@@ -12,13 +12,14 @@ const {
   LEFT_SHIFT
   , RIGHT_SHIFT
   , DOWN_SHIFT
+  , SPEED_UP_TIME
+  , SLOW_DOWN_TIME
+  , CLOCKWISE_ROTATION
+  , CCLOCKWISE_ROTATION
+  , TOGGLE_GRAVITY
 } = CONSTANTS.KEYEVENTS;
 
 class App extends React.Component {
-  tick() {
-    this.props.dispatch(actions.tick());
-  }
-
   onKeyDown(e) {
     e.preventDefault();
     switch(e.keyCode) {
@@ -31,12 +32,26 @@ class App extends React.Component {
       case DOWN_SHIFT:
         this.props.dispatch(actions.shiftFallingBlock(DOWN_SHIFT));
         break;
+      case SPEED_UP_TIME:
+        this.props.dispatch(actions.speedUpTime());
+        break;
+      case SLOW_DOWN_TIME:
+        this.props.dispatch(actions.slowDownTime());
+      case CLOCKWISE_ROTATION:
+        this.props.dispatch(actions.rotateFallingBlock(CLOCKWISE_ROTATION));
+        break;
+      case CCLOCKWISE_ROTATION:
+        this.props.dispatch(actions.rotateFallingBlock(CCLOCKWISE_ROTATION));
+        break;
+      case TOGGLE_GRAVITY:
+        this.props.dispatch(actions.toggleGravity());
+        break;
     };
   }
 
   componentDidMount() {
-    this.props.dispatch(actions.generateFallingBlock());  
-    setInterval(this.tick.bind(this), 1000); // TODO: hardcoded interval
+    this.props.dispatch(actions.generateFallingBlock());
+    this.props.dispatch(actions.startTime());
     document.addEventListener('keydown', this.onKeyDown.bind(this));
   }
 

@@ -8,8 +8,12 @@ const {
   , ROTATE_FALLING_BLOCK
   , SPEED_UP_FALLING_BLOCK
   , ELIMINATE_LINES
+  , STORE_INTERVAL
+  , TOGGLE_GRAVITY
   , CHECK_GAME_STATE
 } = CONSTANTS.MECHANICS;
+
+const {INTERVAL_PERIOD_STEP_SIZE} = CONSTANTS;
 
 // TODO: remove
 export function setGrid(grid) {
@@ -26,9 +30,12 @@ export function generateFallingBlock() {
 }
 
 export function tick() {
-  return (dispatch) => {
+  return (dispatch, getState) => {
+    let state = getState();
     dispatch({type: TICK});
-    dispatch(applyGravityToFallingBlock());
+    if(state.gravityFlag) {
+        dispatch(applyGravityToFallingBlock());
+    }
     dispatch(eliminateLines());
     dispatch(checkGameState());
   };
@@ -69,9 +76,77 @@ export function eliminateLines() {
     };
 }
 
+export function startTime() {
+    return (dispatch, getState) => {
+        let state = getState();
+        let intervalId = setInterval(() => {
+            dispatch(tick());
+        }, state.intervalPeriod);
+        dispatch({
+            type: STORE_INTERVAL
+            , data: {
+                intervalId
+            }
+        });
+    };
+}
+
+export function stopTime() {
+    return (dispatch, getState) => {
+        let state = getState();
+        if(state.intervalId) {
+          clearInterval(state.intervalId);
+        }
+        dispatch({
+            type: STORE_INTERVAL
+            , data: {
+                intervalId: null
+            }
+        });
+    };
+}
+
+export function speedUpTime() {
+    return changeTime(-INTERVAL_PERIOD_STEP_SIZE);
+}
+
+export function slowDownTime() {
+    return changeTime(INTERVAL_PERIOD_STEP_SIZE);
+}
+
+export function changeTime(stepSize) {
+    return (dispatch, getState) => {
+        let state = getState();
+        let intervalPeriod = state.intervalPeriod + stepSize;
+        let intervalId = state.intervalId;
+        
+        if(intervalId) {
+          clearInterval(intervalId);
+        }
+
+        intervalId = setInterval(() => {
+            dispatch(tick());
+        }, intervalPeriod);
+        
+        dispatch({
+            type: STORE_INTERVAL
+            , data: {
+                intervalId
+                , intervalPeriod
+            }
+        });
+    };
+}
+
 export function checkGameState() {
     return {
         type: CHECK_GAME_STATE
     };
+}
+
+export function toggleGravity() {
+  return {
+    type: TOGGLE_GRAVITY
+  };
 }
 
