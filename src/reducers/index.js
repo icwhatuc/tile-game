@@ -4,7 +4,12 @@ import * as GridFactory from '../game/grid';
 import CONSTANTS from '../constants';
 
 const initialState = {
-  fallingBlock: []
+  fallingBlock: {
+    tiles: []
+    , type: null
+    , offset: {x:0, y:0}
+    , orientation: CONSTANTS.ROTATION_ORIENTATION.ZERO
+  }
   , blocks: []
   , gridSize: {
     width: 10
@@ -18,6 +23,8 @@ const initialState = {
   , lossFlag: false
   , intervalId: null
   , intervalPeriod: 1000
+  , gravityFlag: true
+  , score: 0
 };
 
 
@@ -34,6 +41,7 @@ export default (state = initialState, action) => {
     , ELIMINATE_LINES: eliminateLines
     , CHECK_GAME_STATE: checkGameState
     , STORE_INTERVAL: storeInterval
+    , TOGGLE_GRAVITY: toggleGravity
   };
 
   let handler = actionMap[action.type];
@@ -50,11 +58,13 @@ function tick(state) {
   });
 }
 
+// This is only called once upon startup of the game
 function generateFallingBlock(state) {
+  let fallingBlock = BlockFactory.generateRandomBlock({
+      gridSize:state.gridSize
+  });
   return _.assign({}, state, {
-    fallingBlock: BlockFactory.generateRandomBlock({
-      gridSize: state.gridSize
-    })
+    fallingBlock
   });
 }
 
@@ -67,29 +77,27 @@ function applyGravity(state) {
   // and generate a new falling block
   let gravityStrength = 1;
   let {grid, fallingBlock, blocks, gridSize} = state;
-  let updatedFallingBlock = fallingBlock.map((tile) => {
-    return BlockFactory.translateTile(tile, undefined, gravityStrength);
+  let updatedFallingBlock = _.assign({}, fallingBlock, {
+    tiles: fallingBlock.tiles.map((tile) => {
+      return BlockFactory.translateTile(tile, undefined, gravityStrength);
+    })
+    , offset: {
+      x: fallingBlock.offset.x
+      , y: fallingBlock.offset.y + gravityStrength
+    }
   });
-  let isValidPosition = updatedFallingBlock.reduce((check, tile) => {
-    let isOccupied = _.get(grid, [tile.position.y, tile.position.x]) > 0;
-    return check
-      // grid check
-      && tile.position.y < gridSize.height
-      && tile.position.y >= 0
-      && tile.position.x < gridSize.width
-      && tile.position.x >= 0
-      // occupied check
-      && !isOccupied;
-  }, true);
+
+
+  let isValidPosition = isValidPositionForFallingBlock(state, updatedFallingBlock);
 
   if(!isValidPosition) {
-    blocks = blocks.concat([fallingBlock]);
+    blocks = blocks.concat([fallingBlock.tiles]);
+    // TODO - call the function above to generate a random block
     fallingBlock = BlockFactory.generateRandomBlock({gridSize});
   }
   else {
     fallingBlock = updatedFallingBlock;
   }
-
   return _.assign({}, state, {fallingBlock, blocks});
 }
 
@@ -97,36 +105,43 @@ function shiftFallingBlock(state, direction) {
   let {grid, fallingBlock, gridSize} = state;
   let updatedFallingBlock;
   
-  // TODO: check for edge cases
   switch(direction) {
     case CONSTANTS.KEYEVENTS.LEFT_SHIFT:
-      updatedFallingBlock = fallingBlock.map((tile) => {
-        return BlockFactory.translateTile(tile, -1, undefined);
+      updatedFallingBlock = _.assign({}, fallingBlock, {
+        tiles: fallingBlock.tiles.map((tile) => {
+          return BlockFactory.translateTile(tile, -1, 0);
+        })
+        , offset: {
+          x: fallingBlock.offset.x - 1
+          , y: fallingBlock.offset.y
+        }
       });
       break;
     case CONSTANTS.KEYEVENTS.RIGHT_SHIFT:
-      updatedFallingBlock = fallingBlock.map((tile) => {
-        return BlockFactory.translateTile(tile, 1, undefined);
+      updatedFallingBlock = _.assign({}, fallingBlock, {
+        tiles: fallingBlock.tiles.map((tile) => {
+          return BlockFactory.translateTile(tile, 1, 0);
+        })
+        , offset: {
+          x: fallingBlock.offset.x + 1
+          , y: fallingBlock.offset.y
+        }
       });
       break;
     case CONSTANTS.KEYEVENTS.DOWN_SHIFT:
-      updatedFallingBlock = fallingBlock.map((tile) => {
-        return BlockFactory.translateTile(tile, undefined, 1);
+      updatedFallingBlock = _.assign({}, fallingBlock, {
+        tiles: fallingBlock.tiles.map((tile) => {
+          return BlockFactory.translateTile(tile, 0, 1);
+        })
+        , offset: {
+          x: fallingBlock.offset.x
+          , y: fallingBlock.offset.y + 1
+        }
       });
       break;
   };
 
-  let isValidPosition = updatedFallingBlock.reduce((check, tile) => {
-    let isOccupied = _.get(grid, [tile.position.y, tile.position.x]) > 0;
-    return check
-      // grid check
-      && tile.position.y < gridSize.height
-      && tile.position.y >= 0
-      && tile.position.x < gridSize.width
-      && tile.position.x >= 0
-      // occupied check
-      && !isOccupied;
-  }, true);
+  let isValidPosition = isValidPositionForFallingBlock(state, updatedFallingBlock);
 
   return isValidPosition ? _.assign({}, state, {
     fallingBlock: updatedFallingBlock
@@ -134,7 +149,23 @@ function shiftFallingBlock(state, direction) {
 }
 
 function rotateFallingBlock(state, direction) {
-  return state;
+  let gridWidth = state.gridSize.width;
+  let gridHeight = state.gridSize.height;
+  let updatedFallingBlock = BlockFactory.rotateBlock(
+    state.fallingBlock
+    , direction
+    , {
+      gridWidth
+    });
+  
+  // shift IF necessary
+  updatedFallingBlock = shiftFallingBlockIntoGrid(updatedFallingBlock, gridWidth, gridHeight);
+
+  let isValidPosition = isValidPositionForFallingBlock(state, updatedFallingBlock);
+
+  return isValidPosition ? _.assign({}, state, {
+    fallingBlock: updatedFallingBlock
+  }) : state;
 }
 
 function speedUpFallingBlock(state) {
@@ -143,7 +174,7 @@ function speedUpFallingBlock(state) {
 
 function eliminateLines(state) {
   let {grid, gridSize, blocks, fallingBlock} = state;
-  let isNewFallingBlock = fallingBlock.reduce((newBlockFlag, tile) => {
+  let isNewFallingBlock = fallingBlock.tiles.reduce((newBlockFlag, tile) => {
     return newBlockFlag && tile.position.y < gridSize.hidden;
   }, true);
 
@@ -188,6 +219,7 @@ function eliminateLines(state) {
 
   return _.assign({}, state, {
     blocks: updatedBlocks
+    , score: computeNewScore(state, Object.keys(rowsToEliminate).length)
   });
 }
 
@@ -203,12 +235,17 @@ function checkGameState(state) {
         return rowCheck || cellValue > 0;
       }, false);
   }, false);
-  return updatedLossFlag ?_.assign({}, state, {
+  return updatedLossFlag ? _.assign({}, state, {
     grid: []
     , visibleGrid: []
     , displayGrid: []
     , blocks: []
-    , fallingBlock: []
+    , fallingBlock: {
+      tiles: []
+      , type: null
+      , offset: {x:0, y:0}
+      , orientation: CONSTANTS.ROTATION_ORIENTATION.ZERO
+    }
     , lossFlag: true
   }) : state;
 }
@@ -217,12 +254,12 @@ function computeGrid(state) {
   let grid = GridFactory.constructGrid(
     state.gridSize.height
     , state.gridSize.width
-    , [state.fallingBlock].concat(state.blocks)
+    , [state.fallingBlock.tiles].concat(state.blocks)
   );
   let displayGrid = GridFactory.constructGrid(
     state.gridSize.height
     , state.gridSize.width
-    , [state.fallingBlock].concat(state.blocks)
+    , [state.fallingBlock.tiles].concat(state.blocks)
     , {
         assignValues: true
     }
@@ -233,5 +270,66 @@ function computeGrid(state) {
     , displayGrid
     , visibleGrid
   });
+}
+
+function toggleGravity(state) {
+  return _.assign({}, state, {
+    gravityFlag: !state.gravityFlag
+  });
+}
+
+function shiftFallingBlockIntoGrid(updatedFallingBlock, gridWidth, gridHeight) {
+  let minX = updatedFallingBlock.tiles.reduce((min, tile) => {
+    return tile.position.x < min ? tile.position.x : min;
+  }, Infinity);
+  let maxX = updatedFallingBlock.tiles.reduce((max, tile) => {
+    return tile.position.x > max ? tile.position.x : max;
+  }, -Infinity);
+  let maxY = updatedFallingBlock.tiles.reduce((max, tile) => {
+    return tile.position.y > max ? tile.position.y : max;
+  }, -Infinity);
+  let offsetX = 0, offsetY = 0;
+
+  if(minX < 0) {
+    offsetX = -(minX);
+  }
+  else if(maxX >= gridWidth) {
+    offsetX = maxX-gridWidth-1;
+  }
+
+  if(maxY >= gridHeight) {
+    offsetY = maxY-gridHeight-1;
+  }
+  
+  if(offsetX || offsetY) {
+    updatedFallingBlock = _.assign({}, updatedFallingBlock, {
+      tiles: updatedFallingBlock.tiles.map((tile) => (BlockFactory.translateTile(tile, offsetX, offsetY)))
+      , offset: {
+        x: updatedFallingBlock.offset.x + offsetX
+        , y: updatedFallingBlock.offset.y + offsetY
+      }
+    });
+  }
+
+  return updatedFallingBlock;
+}
+
+function isValidPositionForFallingBlock(state, updatedFallingBlock) {
+  let {grid, gridSize} = state;
+  return updatedFallingBlock.tiles.reduce((check, tile) => {
+    let isOccupied = _.get(grid, [tile.position.y, tile.position.x]) > 0;
+    return check
+      // grid check
+      && tile.position.y < gridSize.height
+      && tile.position.y >= 0
+      && tile.position.x < gridSize.width
+      && tile.position.x >= 0
+      // occupied check
+      && !isOccupied;
+  }, true);
+}
+
+function computeNewScore(state, basePoints) {
+    return basePoints + state.score;
 }
 

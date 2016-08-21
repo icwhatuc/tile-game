@@ -7,6 +7,7 @@ export function constructEmptyGrid(gridHeight, gridWidth) {
 
 export function constructGrid(gridHeight, gridWidth, blocks, options = {}) {
   let grid = constructEmptyGrid(gridHeight, gridWidth);
+  
   blocks.forEach((block, blockIdx) => {
     block.forEach((tile) => {
       grid[tile.position.y][tile.position.x] = options.assignValues ?

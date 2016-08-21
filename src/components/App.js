@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import Grid from '../components/grid';
+import Score from './score';
 import applyGravity from '../game/applyGravity';
 
 import * as CONSTANTS from '../constants';
@@ -11,6 +12,9 @@ const {
   , DOWN_SHIFT
   , SPEED_UP_TIME
   , SLOW_DOWN_TIME
+  , CLOCKWISE_ROTATION
+  , CCLOCKWISE_ROTATION
+  , TOGGLE_GRAVITY
 } = CONSTANTS.KEYEVENTS;
 
 class App extends React.Component {
@@ -31,6 +35,14 @@ class App extends React.Component {
         break;
       case SLOW_DOWN_TIME:
         this.props.dispatch(actions.slowDownTime());
+      case CLOCKWISE_ROTATION:
+        this.props.dispatch(actions.rotateFallingBlock(CLOCKWISE_ROTATION));
+        break;
+      case CCLOCKWISE_ROTATION:
+        this.props.dispatch(actions.rotateFallingBlock(CCLOCKWISE_ROTATION));
+        break;
+      case TOGGLE_GRAVITY:
+        this.props.dispatch(actions.toggleGravity());
         break;
     };
   }
@@ -44,6 +56,7 @@ class App extends React.Component {
   render () {
     return (
       <div style={{ height: '100%' }}>
+        <Score value={this.props.score}/>
         <Grid {...this.props}/>
       </div>
     )
