@@ -1,6 +1,8 @@
 import React, { PropTypes } from 'react';
 import Grid from '../components/grid';
 import Score from './score';
+import Level from './level';
+import BlocksEliminated from './blocksEliminated';
 import applyGravity from '../game/applyGravity';
 
 import * as CONSTANTS from '../constants';
@@ -41,6 +43,8 @@ class App extends React.Component {
   render () {
     return (
       <div style={{ height: '100%' }}>
+        <Level value={this.props.level}/>
+        <BlocksEliminated value={this.props.blocksEliminated}/>
         <Score value={this.props.score}/>
         <Grid {...this.props}/>
       </div>

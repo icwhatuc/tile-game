@@ -17,6 +17,8 @@ const initialState = {
   , visibleGrid: []
   , lossFlag: false
   , score: 0
+  , level: 0
+  , blocksEliminated: 0
 };
 
 
@@ -187,6 +189,8 @@ function eliminateLines(state) {
   return _.assign({}, state, {
     blocks: updatedBlocks
     , score: computeNewScore(state, Object.keys(rowsToEliminate).length)
+    , blocksEliminated: computeBlocksEliminated(state, Object.keys(rowsToEliminate).length * state.gridSize.width)
+    , level: computeNewLevel(state, Object.keys(rowsToEliminate).length * state.gridSize.width)
   });
 }
 
@@ -234,4 +238,10 @@ function computeNewScore(state, basePoints) {
     return basePoints + state.score;
 }
 
+function computeBlocksEliminated(state, blocksEliminated) {
+    return blocksEliminated + state.blocksEliminated;
+}
 
+function computeNewLevel(state, blocksEliminated) {
+    return Math.floor((state.blocksEliminated + blocksEliminated) / CONSTANTS.BLOCKS_PER_LEVEL);
+}

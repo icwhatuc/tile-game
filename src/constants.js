@@ -24,5 +24,6 @@ module.exports = {
     , RIGHT_SHIFT: 39
     , DOWN_SHIFT: 40
   }
+  , BLOCKS_PER_LEVEL: 100
 };
 
