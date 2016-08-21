@@ -12,39 +12,36 @@ export function generateRandomBlock(options) {
   const gridHiddenHeight = _.get(options, 'gridSize.hidden') || 4;
   
   // generate a random block type
-  let randomBlockType = generateRandomBlockType();
-  let block = generateRandomBlockOfType(randomBlockType);
-  // generate a configuration - rotation + position
-  // rotation + position must be such that at least one tile
-  block = rotateRandomly(block);
+  let type = generateRandomBlockType();
+  let block = generateRandomBlockOfType(type);
+  let orientation = generateRandomOrientation();
 
-  /* TODO put back
-  block = positionRandomly(block, {
+  let randomXOffset = getRandomXOffset(block, {
     gridSize: {
       gridHeight: gridHiddenHeight
       , gridWidth
     }
   });
-  */
+  let offset = _.assign({}, {
+    x: BLOCK_ROTATION_OFFSETS[type].x + randomXOffset
+    , y: BLOCK_ROTATION_OFFSETS[type].y
+  });
+
+  // position randomly
+  block = block.map((tile) => (translateTile(tile, randomXOffset, 0)));
 
   // assign random values to the tiles
   block = block.map((tile) => {
-    let value 
     return _.assign({}, tile, {
-      value: Math.random() < 0.9 ? 2 : 4
+      value: Math.random() < 0.9 ? 2 : 4 // TODO: hardcoded constants
     });
   });
-
-  let rotationOffset = _.assign({}, BLOCK_ROTATION_OFFSETS[randomBlockType]);
-
-  return {
-      block: block,
-      blockProperties: {
-          rotationOffset: rotationOffset
-          , rotationOrientation: ROTATION_ORIENTATION.ZERO
-          , type: randomBlockType
-      }
-  };
+  
+  return applyOrientation({
+    tiles: block
+    , offset
+    , type
+  }, orientation);
 }
 
 export function cloneBlock(block) {
@@ -65,17 +62,16 @@ function generateRandomBlockOfType(type) {
   return cloneBlock(BLOCKS[type]);
 }
 
-function rotateRandomly(block) {
-  // TODO
-  return block;
+function generateRandomOrientation() {
+  let orientations = _.values(ROTATION_ORIENTATION); 
+  return orientations[Math.floor(Math.random()*orientations.length)];
 }
 
-function positionRandomly(block, options) {
+function getRandomXOffset(block, options) {
   let {gridWidth} = options.gridSize;
   let blockWidth = calculateBlockWidth(block);
   let validXRange = gridWidth - blockWidth;
-  let offset = Math.floor(Math.random()*validXRange);
-  return block.map((tile) => (translateTile(tile, offset, undefined)));
+  return Math.floor(Math.random()*validXRange);
 }
 
 export function translateTile(tile, offsetx = 0, offsety = 0) {
@@ -108,45 +104,44 @@ function calculateRangeGivenProp(block, prop) {
 }
 
 // note: rotationOffset is the offset of the 4x4 box
-export function rotateBlock(block, direction, blockProperties, options) {
+export function rotateBlock(block, direction, options) {
 
     // Rotation based on http://codeincomplete.com/posts/javascript-tetris/
 
 
     let {gridWidth} = options;
-    let {type, rotationOrientation, rotationOffset} = blockProperties;
+    let {type, orientation, offset} = block;
 
     // may have to refactor in the future if we want to rotate other blocks
     // IDEA for an item: be able to select any block and re place it! - will
 
     let orderedOrientations = _.values(ROTATION_ORIENTATION)
         .sort((a, b) => (a - b));
-    let newOrientation = orderedOrientations.find((orientation, index) => {
+    let updatedOrientation = orderedOrientations.find((o, index) => {
         let prevOrientation = orderedOrientations[(index - 1 + 4) % orderedOrientations.length];
         let nextOrientation = orderedOrientations[(index + 1 + 4) % orderedOrientations.length];
 
-        return direction === CLOCKWISE_ROTATION && prevOrientation === blockProperties.rotationOrientation
-          || direction === CCLOCKWISE_ROTATION && nextOrientation === blockProperties.rotationOrientation;
+        return direction === CLOCKWISE_ROTATION && prevOrientation === orientation
+          || direction === CCLOCKWISE_ROTATION && nextOrientation === orientation;
 
     });
     
-    let rotationsForBlock = BLOCK_ROTATIONS[type][newOrientation];
-    let newBlock = block.map((tile, index) => {
+    return applyOrientation(block, updatedOrientation);
+}
+
+export function applyOrientation(block, updatedOrientation) {
+    let {type, offset} = block;
+    let rotationsForBlock = BLOCK_ROTATIONS[type][updatedOrientation];
+    return _.assign({}, block, {
+      tiles: block.tiles.map((tile, index) => {
         return _.assign({}, tile, {
             position: {
-                x: rotationsForBlock[index].position.x + rotationOffset.x
-                , y: rotationsForBlock[index].position.y + rotationOffset.y
+                x: rotationsForBlock[index].position.x + offset.x
+                , y: rotationsForBlock[index].position.y + offset.y
             }
         });
+      })
+      , orientation: updatedOrientation
     });
-
-    return {
-        fallingBlock: newBlock,
-        fallingBlockProperties: {
-            rotationOffset: blockProperties.rotationOffset,
-            rotationOrientation: newOrientation,
-            type: type
-        }
-    };
 }
 

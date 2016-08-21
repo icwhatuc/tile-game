@@ -4,7 +4,12 @@ import * as GridFactory from '../game/grid';
 import CONSTANTS from '../constants';
 
 const initialState = {
-  fallingBlock: []
+  fallingBlock: {
+    tiles: []
+    , type: null
+    , offset: {x:0, y:0}
+    , orientation: CONSTANTS.ROTATION_ORIENTATION.ZERO
+  }
   , blocks: []
   , gridSize: {
     width: 10
@@ -15,11 +20,6 @@ const initialState = {
   , grid: []
   , displayGrid: []
   , visibleGrid: []
-  , fallingBlockProperties: {
-    type: "", 
-    rotationOffset: {x:0, y:0}, 
-    rotationOrientation: CONSTANTS.ROTATION_ORIENTATION.ZERO
-  }
   , lossFlag: false
   , gravityFlag: true
 };
@@ -56,14 +56,11 @@ function tick(state) {
 
 // This is only called once upon startup of the game
 function generateFallingBlock(state) {
-  let randomBlockObject = BlockFactory.generateRandomBlock({
+  let fallingBlock = BlockFactory.generateRandomBlock({
       gridSize:state.gridSize
   });
-  let fallingBlock = randomBlockObject.block;
-  let fallingBlockProperties = randomBlockObject.blockProperties;
   return _.assign({}, state, {
-    fallingBlock: fallingBlock,
-    fallingBlockProperties: fallingBlockProperties
+    fallingBlock
   });
 }
 
@@ -75,15 +72,19 @@ function applyGravity(state) {
   // update it's position, add it to existing list of blocks,
   // and generate a new falling block
   let gravityStrength = 1;
-  let {grid, fallingBlock, fallingBlockProperties, blocks, gridSize} = state;
-  let updatedFallingBlock = fallingBlock.map((tile) => {
-    return BlockFactory.translateTile(tile, undefined, gravityStrength);
+  let {grid, fallingBlock, blocks, gridSize} = state;
+  let updatedFallingBlock = _.assign({}, fallingBlock, {
+    tiles: fallingBlock.tiles.map((tile) => {
+      return BlockFactory.translateTile(tile, undefined, gravityStrength);
+    })
+    , offset: {
+      x: fallingBlock.offset.x
+      , y: fallingBlock.offset.y + gravityStrength
+    }
   });
 
-  // also adjust the rotation offset region
-  fallingBlockProperties.rotationOffset.y += gravityStrength;
 
-  let isValidPosition = updatedFallingBlock.reduce((check, tile) => {
+  let isValidPosition = updatedFallingBlock.tiles.reduce((check, tile) => {
     let isOccupied = _.get(grid, [tile.position.y, tile.position.x]) > 0;
     return check
       // grid check
@@ -96,45 +97,57 @@ function applyGravity(state) {
   }, true);
 
   if(!isValidPosition) {
-    blocks = blocks.concat([fallingBlock]);
+    blocks = blocks.concat([fallingBlock.tiles]);
     // TODO - call the function above to generate a random block
-    let randomBlockObject = BlockFactory.generateRandomBlock({gridSize});
-    fallingBlock = randomBlockObject.block;
-    fallingBlockProperties = randomBlockObject.blockProperties;
+    fallingBlock = BlockFactory.generateRandomBlock({gridSize});
   }
   else {
     fallingBlock = updatedFallingBlock;
   }
-  return _.assign({}, state, {fallingBlock, fallingBlockProperties, blocks});
+  return _.assign({}, state, {fallingBlock, blocks});
 }
 
 function shiftFallingBlock(state, direction) {
-  let {grid, fallingBlock, fallingBlockProperties, gridSize} = state;
+  let {grid, fallingBlock, gridSize} = state;
   let updatedFallingBlock;
-  let updatedFallingBlockProperties = _.assign({}, fallingBlockProperties);
-  // TODO: check for edge cases
+  
   switch(direction) {
     case CONSTANTS.KEYEVENTS.LEFT_SHIFT:
-      updatedFallingBlock = fallingBlock.map((tile) => {
-        return BlockFactory.translateTile(tile, -1, undefined);
+      updatedFallingBlock = _.assign({}, fallingBlock, {
+        tiles: fallingBlock.tiles.map((tile) => {
+          return BlockFactory.translateTile(tile, -1, 0);
+        })
+        , offset: {
+          x: fallingBlock.offset.x - 1
+          , y: fallingBlock.offset.y
+        }
       });
-      updatedFallingBlockProperties.rotationOffset.x -= 1;
       break;
     case CONSTANTS.KEYEVENTS.RIGHT_SHIFT:
-      updatedFallingBlock = fallingBlock.map((tile) => {
-        return BlockFactory.translateTile(tile, 1, undefined);
+      updatedFallingBlock = _.assign({}, fallingBlock, {
+        tiles: fallingBlock.tiles.map((tile) => {
+          return BlockFactory.translateTile(tile, 1, 0);
+        })
+        , offset: {
+          x: fallingBlock.offset.x + 1
+          , y: fallingBlock.offset.y
+        }
       });
-      updatedFallingBlockProperties.rotationOffset.x += 1;
       break;
     case CONSTANTS.KEYEVENTS.DOWN_SHIFT:
-      updatedFallingBlock = fallingBlock.map((tile) => {
-        return BlockFactory.translateTile(tile, undefined, 1);
+      updatedFallingBlock = _.assign({}, fallingBlock, {
+        tiles: fallingBlock.tiles.map((tile) => {
+          return BlockFactory.translateTile(tile, 0, 1);
+        })
+        , offset: {
+          x: fallingBlock.offset.x
+          , y: fallingBlock.offset.y + 1
+        }
       });
-      updatedFallingBlockProperties.rotationOffset.y += 1;
       break;
   };
 
-  let isValidPosition = updatedFallingBlock.reduce((check, tile) => {
+  let isValidPosition = updatedFallingBlock.tiles.reduce((check, tile) => {
     let isOccupied = _.get(grid, [tile.position.y, tile.position.x]) > 0;
     return check
       // grid check
@@ -148,19 +161,18 @@ function shiftFallingBlock(state, direction) {
 
   return isValidPosition ? _.assign({}, state, {
     fallingBlock: updatedFallingBlock
-    , fallingBlockProperties: updatedFallingBlockProperties
   }) : state;
 }
 
 function rotateFallingBlock(state, direction) {
-  return _.assign({}, state, 
-    BlockFactory.rotateBlock(state.fallingBlock
+  return _.assign({}, state, {
+    fallingBlock: BlockFactory.rotateBlock(
+      state.fallingBlock
       , direction
-      , state.fallingBlockProperties
       , {
         gridWidth: state.gridSize.width
-    })
-  );
+      })
+  });
 }
 
 function speedUpFallingBlock(state) {
@@ -169,7 +181,7 @@ function speedUpFallingBlock(state) {
 
 function eliminateLines(state) {
   let {grid, gridSize, blocks, fallingBlock} = state;
-  let isNewFallingBlock = fallingBlock.reduce((newBlockFlag, tile) => {
+  let isNewFallingBlock = fallingBlock.tiles.reduce((newBlockFlag, tile) => {
     return newBlockFlag && tile.position.y < gridSize.hidden;
   }, true);
 
@@ -239,12 +251,12 @@ function computeGrid(state) {
   let grid = GridFactory.constructGrid(
     state.gridSize.height
     , state.gridSize.width
-    , [state.fallingBlock].concat(state.blocks)
+    , [state.fallingBlock.tiles].concat(state.blocks)
   );
   let displayGrid = GridFactory.constructGrid(
     state.gridSize.height
     , state.gridSize.width
-    , [state.fallingBlock].concat(state.blocks)
+    , [state.fallingBlock.tiles].concat(state.blocks)
     , {
         assignValues: true
     }
