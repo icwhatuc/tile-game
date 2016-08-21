@@ -186,7 +186,7 @@ function eliminateLines(state) {
 
   return _.assign({}, state, {
     blocks: updatedBlocks
-    , score: state.score + Object.keys(rowsToEliminate).length
+    , score: computeNewScore(state, Object.keys(rowsToEliminate).length)
   });
 }
 
@@ -229,4 +229,9 @@ function computeGrid(state) {
     , visibleGrid
   });
 }
+
+function computeNewScore(state, basePoints) {
+    return basePoints + state.score;
+}
+
 
