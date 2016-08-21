@@ -119,18 +119,16 @@ export function rotateBlock(block, direction, blockProperties, options) {
     // may have to refactor in the future if we want to rotate other blocks
     // IDEA for an item: be able to select any block and re place it! - will
 
-    let orderedOrientations = Object.keys(ROTATION_ORIENTATION)
-        .sort((a, b) => (ROTATION_ORIENTATION[a] - ROTATION_ORIENTATION[b]))
-        .map((orientationName) => (ROTATION_ORIENTATION[orientationName]));
+    let orderedOrientations = _.values(ROTATION_ORIENTATION)
+        .sort((a, b) => (a - b));
+    let newOrientation = orderedOrientations.find((orientation, index) => {
+        let prevOrientation = orderedOrientations[(index - 1 + 4) % orderedOrientations.length];
+        let nextOrientation = orderedOrientations[(index + 1 + 4) % orderedOrientations.length];
 
-    let newOrientation = orderedOrientations.reduce((prev, orientation, index) => {
-            if(orientation === blockProperties.rotationOrientation) {
-                return direction === CLOCKWISE_ROTATION ?
-                    orderedOrientations[(index + 1 + 4)%4] :
-                    orderedOrientations[(index - 1 + 4)%4];
-            }
-            return prev;
-        }, undefined);
+        return direction === CLOCKWISE_ROTATION && prevOrientation === blockProperties.rotationOrientation
+          || direction === CCLOCKWISE_ROTATION && nextOrientation === blockProperties.rotationOrientation;
+
+    });
     
     let rotationsForBlock = BLOCK_ROTATIONS[type][newOrientation];
     let newBlock = block.map((tile, index) => {

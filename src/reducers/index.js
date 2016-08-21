@@ -154,12 +154,12 @@ function shiftFallingBlock(state, direction) {
 
 function rotateFallingBlock(state, direction) {
   return _.assign({}, state, 
-    BlockFactory.rotateBlock(state.fallingBlock, 
-                               direction, 
-                               state.fallingBlockProperties, 
-                               {
-                                  gridWidth: state.gridSize.width
-                               })
+    BlockFactory.rotateBlock(state.fallingBlock
+      , direction
+      , state.fallingBlockProperties
+      , {
+        gridWidth: state.gridSize.width
+    })
   );
 }
 
