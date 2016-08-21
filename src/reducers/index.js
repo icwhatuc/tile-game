@@ -25,6 +25,8 @@ const initialState = {
   , intervalPeriod: 1000
   , gravityFlag: true
   , score: 0
+  , level: 0
+  , blocksEliminated: 0
 };
 
 
@@ -42,6 +44,7 @@ export default (state = initialState, action) => {
     , CHECK_GAME_STATE: checkGameState
     , STORE_INTERVAL: storeInterval
     , TOGGLE_GRAVITY: toggleGravity
+    , LEVEL_UP: levelUp
   };
 
   let handler = actionMap[action.type];
@@ -220,6 +223,7 @@ function eliminateLines(state) {
   return _.assign({}, state, {
     blocks: updatedBlocks
     , score: computeNewScore(state, Object.keys(rowsToEliminate).length)
+    , blocksEliminated: computeBlocksEliminated(state, Object.keys(rowsToEliminate).length * state.gridSize.width)
   });
 }
 
@@ -278,6 +282,12 @@ function toggleGravity(state) {
   });
 }
 
+function levelUp(state, updatedLevel) {
+  return _.assign({}, state, {
+    level: updatedLevel
+  });
+}
+
 function shiftFallingBlockIntoGrid(updatedFallingBlock, gridWidth, gridHeight) {
   let minX = updatedFallingBlock.tiles.reduce((min, tile) => {
     return tile.position.x < min ? tile.position.x : min;
@@ -331,5 +341,9 @@ function isValidPositionForFallingBlock(state, updatedFallingBlock) {
 
 function computeNewScore(state, basePoints) {
     return basePoints + state.score;
+}
+
+function computeBlocksEliminated(state, blocksEliminated) {
+    return blocksEliminated + state.blocksEliminated;
 }
 

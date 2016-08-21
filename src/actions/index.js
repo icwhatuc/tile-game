@@ -10,6 +10,7 @@ const {
   , ELIMINATE_LINES
   , STORE_INTERVAL
   , TOGGLE_GRAVITY
+  , LEVEL_UP
   , CHECK_GAME_STATE
 } = CONSTANTS.MECHANICS;
 
@@ -32,11 +33,21 @@ export function generateFallingBlock() {
 export function tick() {
   return (dispatch, getState) => {
     let state = getState();
+    let updatedLevel = computeNewLevel(state);
+
     dispatch({type: TICK});
+    
     if(state.gravityFlag) {
         dispatch(applyGravityToFallingBlock());
     }
+    
     dispatch(eliminateLines());
+    
+    if(state.level !== updatedLevel) {
+      dispatch(updateLevel(updatedLevel));
+      dispatch(speedUpTime());
+    }
+    
     dispatch(checkGameState());
   };
 }
@@ -148,5 +159,16 @@ export function toggleGravity() {
   return {
     type: TOGGLE_GRAVITY
   };
+}
+
+export function updateLevel(updatedLevel) {
+  return {
+    type: LEVEL_UP
+    , data: updatedLevel
+  };
+}
+
+function computeNewLevel(state) {
+    return Math.floor(state.blocksEliminated / CONSTANTS.BLOCKS_PER_LEVEL);
 }
 
