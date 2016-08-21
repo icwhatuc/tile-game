@@ -44,6 +44,7 @@ export default (state = initialState, action) => {
     , CHECK_GAME_STATE: checkGameState
     , STORE_INTERVAL: storeInterval
     , TOGGLE_GRAVITY: toggleGravity
+    , LEVEL_UP: levelUp
   };
 
   let handler = actionMap[action.type];
@@ -223,7 +224,6 @@ function eliminateLines(state) {
     blocks: updatedBlocks
     , score: computeNewScore(state, Object.keys(rowsToEliminate).length)
     , blocksEliminated: computeBlocksEliminated(state, Object.keys(rowsToEliminate).length * state.gridSize.width)
-    , level: computeNewLevel(state, Object.keys(rowsToEliminate).length * state.gridSize.width)
   });
 }
 
@@ -279,6 +279,12 @@ function computeGrid(state) {
 function toggleGravity(state) {
   return _.assign({}, state, {
     gravityFlag: !state.gravityFlag
+  });
+}
+
+function levelUp(state, updatedLevel) {
+  return _.assign({}, state, {
+    level: updatedLevel
   });
 }
 
@@ -341,6 +347,3 @@ function computeBlocksEliminated(state, blocksEliminated) {
     return blocksEliminated + state.blocksEliminated;
 }
 
-function computeNewLevel(state, blocksEliminated) {
-    return Math.floor((state.blocksEliminated + blocksEliminated) / CONSTANTS.BLOCKS_PER_LEVEL);
-}
