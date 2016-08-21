@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import Grid from '../components/grid';
+import Score from './score';
 import applyGravity from '../game/applyGravity';
 
 import * as CONSTANTS from '../constants';
@@ -40,6 +41,7 @@ class App extends React.Component {
   render () {
     return (
       <div style={{ height: '100%' }}>
+        <Score value={this.props.score}/>
         <Grid {...this.props}/>
       </div>
     )

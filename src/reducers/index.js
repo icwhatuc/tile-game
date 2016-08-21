@@ -16,6 +16,7 @@ const initialState = {
   , displayGrid: []
   , visibleGrid: []
   , lossFlag: false
+  , score: 0
 };
 
 
@@ -185,6 +186,7 @@ function eliminateLines(state) {
 
   return _.assign({}, state, {
     blocks: updatedBlocks
+    , score: computeNewScore(state, Object.keys(rowsToEliminate).length)
   });
 }
 
@@ -227,4 +229,9 @@ function computeGrid(state) {
     , visibleGrid
   });
 }
+
+function computeNewScore(state, basePoints) {
+    return basePoints + state.score;
+}
+
 
