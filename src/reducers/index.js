@@ -8,7 +8,7 @@ const initialState = {
     tiles: []
     , type: null
     , offset: {x:0, y:0}
-    , orientation: CONSTANTS.ROTATION_ORIENTATION.ZERO
+    , orientation: null
   }
   , blocks: []
   , gridSize: {
@@ -248,7 +248,7 @@ function checkGameState(state) {
       tiles: []
       , type: null
       , offset: {x:0, y:0}
-      , orientation: CONSTANTS.ROTATION_ORIENTATION.ZERO
+      , orientation: null
     }
     , lossFlag: true
   }) : state;

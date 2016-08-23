@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import CONSTANTS from '../constants';
+import GAME_CONSTANTS from './constants';
 
-const {BLOCKS} = CONSTANTS;
-const {BLOCK_ROTATIONS} = CONSTANTS;
-const {BLOCK_ROTATION_OFFSETS} = CONSTANTS;
-const {CLOCKWISE_ROTATION, CCLOCKWISE_ROTATION} = CONSTANTS.KEYEVENTS;
-const {ROTATION_ORIENTATION} = CONSTANTS;
+const {BLOCKS, ORIENTATIONS, ROTATIONS} = GAME_CONSTANTS;
+const {CLOCKWISE_ROTATION, CCLOCKWISE_ROTATION} = ROTATIONS;
+
+
 export function generateRandomBlock(options) {
   const gridHeight = _.get(options, 'gridSize.height') || 4;
   const gridWidth = _.get(options, 'gridSize.width') || 4;
@@ -23,8 +23,8 @@ export function generateRandomBlock(options) {
     }
   });
   let offset = _.assign({}, {
-    x: BLOCK_ROTATION_OFFSETS[type].x + randomXOffset
-    , y: BLOCK_ROTATION_OFFSETS[type].y
+    x: BLOCKS[type].BASE_OFFSET.x + randomXOffset
+    , y: BLOCKS[type].BASE_OFFSET.y
   });
 
   // position randomly
@@ -59,11 +59,11 @@ function generateRandomBlockType() {
 }
 
 function generateRandomBlockOfType(type) {
-  return cloneBlock(BLOCKS[type]);
+  return cloneBlock(BLOCKS[type].ROTATIONS[0]);
 }
 
 function generateRandomOrientation() {
-  let orientations = _.values(ROTATION_ORIENTATION); 
+  let orientations = _.values(ORIENTATIONS); 
   return orientations[Math.floor(Math.random()*orientations.length)];
 }
 
@@ -115,7 +115,7 @@ export function rotateBlock(block, direction, options) {
     // may have to refactor in the future if we want to rotate other blocks
     // IDEA for an item: be able to select any block and re place it! - will
 
-    let orderedOrientations = _.values(ROTATION_ORIENTATION)
+    let orderedOrientations = _.values(ORIENTATIONS)
         .sort((a, b) => (a - b));
     let updatedOrientation = orderedOrientations.find((o, index) => {
         let prevOrientation = orderedOrientations[(index - 1 + 4) % orderedOrientations.length];
@@ -131,7 +131,7 @@ export function rotateBlock(block, direction, options) {
 
 export function applyOrientation(block, updatedOrientation) {
     let {type, offset} = block;
-    let rotationsForBlock = BLOCK_ROTATIONS[type][updatedOrientation];
+    let rotationsForBlock = BLOCKS[type].ROTATIONS[updatedOrientation];
     return _.assign({}, block, {
       tiles: block.tiles.map((tile, index) => {
         return _.assign({}, tile, {
