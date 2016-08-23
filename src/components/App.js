@@ -21,32 +21,23 @@ const {
 
 class App extends React.Component {
   onKeyDown(e) {
-    e.preventDefault();
-    switch(e.keyCode) {
-      case LEFT_SHIFT:
-        this.props.dispatch(actions.shiftFallingBlock(LEFT_SHIFT));
-        break;
-      case RIGHT_SHIFT:
-        this.props.dispatch(actions.shiftFallingBlock(RIGHT_SHIFT));
-        break;
-      case DOWN_SHIFT:
-        this.props.dispatch(actions.shiftFallingBlock(DOWN_SHIFT));
-        break;
-      case SPEED_UP_TIME:
-        this.props.dispatch(actions.speedUpTime());
-        break;
-      case SLOW_DOWN_TIME:
-        this.props.dispatch(actions.slowDownTime());
-      case CLOCKWISE_ROTATION:
-        this.props.dispatch(actions.rotateFallingBlock(CLOCKWISE_ROTATION));
-        break;
-      case CCLOCKWISE_ROTATION:
-        this.props.dispatch(actions.rotateFallingBlock(CCLOCKWISE_ROTATION));
-        break;
-      case TOGGLE_GRAVITY:
-        this.props.dispatch(actions.toggleGravity());
-        break;
+    const {dispatch} = this.props;
+    const keyMap = {
+      [LEFT_SHIFT]: dispatch.bind(null, actions.shiftFallingBlock(LEFT_SHIFT))
+      , [RIGHT_SHIFT]: dispatch.bind(null, actions.shiftFallingBlock(RIGHT_SHIFT))
+      , [DOWN_SHIFT]: dispatch.bind(null, actions.shiftFallingBlock(DOWN_SHIFT))
+      , [CLOCKWISE_ROTATION]: dispatch.bind(null, actions.rotateFallingBlock(CLOCKWISE_ROTATION))
+      , [CCLOCKWISE_ROTATION]: dispatch.bind(null, actions.rotateFallingBlock(CCLOCKWISE_ROTATION))
+      , [SPEED_UP_TIME]: dispatch.bind(null, actions.speedUpTime())
+      , [SLOW_DOWN_TIME]: dispatch.bind(null, actions.slowDownTime())
+      , [TOGGLE_GRAVITY]: dispatch.bind(null, actions.toggleGravity())
     };
+    let action = keyMap[e.keyCode];
+    
+    if(action) {
+      action();
+      e.preventDefault();
+    }
   }
 
   componentDidMount() {
