@@ -172,7 +172,27 @@ function rotateFallingBlock(state, direction) {
 }
 
 function speedUpFallingBlock(state) {
-  return state;
+  let updatedFallingBlock
+    , prevPositionedBlock = state.fallingBlock;
+  let isValidPosition = true;
+  
+  while(isValidPosition) {
+    updatedFallingBlock = prevPositionedBlock;
+    prevPositionedBlock = _.assign({}, updatedFallingBlock, {
+      tiles: updatedFallingBlock.tiles.map((tile) => {
+        return BlockFactory.translateTile(tile, 0, 1);
+      })
+      , offset: {
+        x: updatedFallingBlock.offset.x
+        , y: updatedFallingBlock.offset.y + 1
+      }
+    });
+    isValidPosition = isValidPositionForFallingBlock(state, prevPositionedBlock);
+  }
+
+  return _.assign({}, state, {
+    fallingBlock: updatedFallingBlock
+  });
 }
 
 function eliminateLines(state) {

@@ -25,7 +25,7 @@ class App extends React.Component {
     const keyMap = {
       [LEFT_SHIFT]: dispatch.bind(null, actions.shiftFallingBlock(LEFT_SHIFT))
       , [RIGHT_SHIFT]: dispatch.bind(null, actions.shiftFallingBlock(RIGHT_SHIFT))
-      , [DOWN_SHIFT]: dispatch.bind(null, actions.shiftFallingBlock(DOWN_SHIFT))
+      , [DOWN_SHIFT]: dispatch.bind(null, actions.speedUpFallingBlock())
       , [CLOCKWISE_ROTATION]: dispatch.bind(null, actions.rotateFallingBlock(CLOCKWISE_ROTATION))
       , [CCLOCKWISE_ROTATION]: dispatch.bind(null, actions.rotateFallingBlock(CCLOCKWISE_ROTATION))
       , [SPEED_UP_TIME]: dispatch.bind(null, actions.speedUpTime())
