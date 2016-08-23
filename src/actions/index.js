@@ -16,14 +16,6 @@ const {
 
 const {INTERVAL_PERIOD_STEP_SIZE} = CONSTANTS;
 
-// TODO: remove
-export function setGrid(grid) {
-  return {
-    type: 'SET_GRID'
-    , data: grid
-  };
-}
-
 export function generateFallingBlock() {
     return {
         type: GENERATE_FALLING_BLOCK
