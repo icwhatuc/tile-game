@@ -5,10 +5,8 @@ import dble from './dble';
 
 module.exports = {
   dble
-  /*
   , lblock
   , line
   , square
-  */
 };
 
