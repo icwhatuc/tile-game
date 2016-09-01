@@ -207,16 +207,13 @@ function eliminateLines(state) {
 
   let rowsToEliminate = grid.reduce((completedRows, gridRow, rowIdx) => {
     let isComplete = gridRow.reduce((completeFlag, gridCell) => {
-      return completeFlag ? 
-        gridCell !== null
-        : false;
+      return completeFlag && gridCell !== null;
     }, true);
     if(isComplete) {
       completedRows[rowIdx] = true;
     }
     return completedRows;
   },  {});
-
   if(Object.keys(rowsToEliminate).length === 0) {
     return state;
   }
@@ -347,7 +344,8 @@ function shiftFallingBlockIntoGrid(updatedFallingBlock, gridWidth, gridHeight) {
 function isValidPositionForFallingBlock(state, updatedFallingBlock) {
   let {grid, gridSize} = state;
   return updatedFallingBlock.tiles.reduce((check, tile) => {
-    let isOccupied = _.get(grid, [tile.position.y, tile.position.x]) > 0;
+    let isOccupied = _.get(grid, [tile.position.y, tile.position.x]) > 0
+      && !isNaN(_.get(grid, [tile.position.y, tile.position.x]));
     return check
       // grid check
       && tile.position.y < gridSize.height

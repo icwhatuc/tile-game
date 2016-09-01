@@ -15,17 +15,7 @@ export function generateRandomBlock(options) {
   let type = generateRandomBlockType();
   let block = generateRandomBlockOfType(type);
   let orientation = generateRandomOrientation();
-
-  let randomXOffset = getRandomXOffset(block, {
-    gridSize: {
-      gridHeight: gridHiddenHeight
-      , gridWidth
-    }
-  });
-  let offset = _.assign({}, {
-    x: BLOCKS[type].BASE_OFFSET.x + randomXOffset
-    , y: BLOCKS[type].BASE_OFFSET.y
-  });
+  let randomXOffset, yOffset, offset;
 
   // position randomly
   block = block.map((tile) => (translateTile(tile, randomXOffset, 0)));
@@ -37,11 +27,38 @@ export function generateRandomBlock(options) {
     });
   });
   
-  return applyOrientation({
+  // falling block with orientation, offset info
+  block = applyOrientation({
     tiles: block
-    , offset
+    , offset: BLOCKS[type].BASE_OFFSET
     , type
   }, orientation);
+  
+  // position randomly
+  randomXOffset = getRandomXOffset(block.tiles, {
+    gridSize: {
+      gridHeight: gridHiddenHeight
+      , gridWidth
+    }
+  });
+
+  // start the block off as low as possible
+  let maxY = block.tiles.reduce((currMax, tile) => {
+    return Math.max(currMax, tile.position.y);
+  }, -Infinity);
+  yOffset = gridHiddenHeight - maxY - 1;
+
+  offset = {
+    x: BLOCKS[type].BASE_OFFSET.x + randomXOffset
+    , y: BLOCKS[type].BASE_OFFSET.y + yOffset
+  };
+
+  return {
+    tiles: block.tiles.map((tile) => (translateTile(tile, randomXOffset, yOffset)))
+    , offset
+    , type
+    , orientation: block.orientation
+  };
 }
 
 export function cloneBlock(block) {
@@ -70,7 +87,8 @@ function generateRandomOrientation() {
 function getRandomXOffset(block, options) {
   let {gridWidth} = options.gridSize;
   let blockWidth = calculateBlockWidth(block);
-  let validXRange = gridWidth - blockWidth;
+  //let validXRange = gridWidth - blockWidth;
+  let validXRange = gridWidth - 4; // say all block widths are 4 to avoid boundary issues
   return Math.floor(Math.random()*validXRange);
 }
 
