@@ -285,11 +285,12 @@ function computeGrid(state) {
         assignValues: true
     }
   );
-  let visibleGrid = displayGrid.slice(state.gridSize.hidden);
+  
   return _.assign({}, state, {
     grid
     , displayGrid
-    , visibleGrid
+    , visibleGrid: grid.slice(state.gridSize.hidden)
+    , visibleDisplayGrid: displayGrid.slice(state.gridSize.hidden)
   });
 }
 

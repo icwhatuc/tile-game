@@ -18,6 +18,26 @@
   -webkit-user-select: none;
 }
 
+.grid__cell--no-shadow {
+  box-shadow: none;
+}
+
+.grid__cell--extends-top {
+  border-top: black solid 1px;
+}
+
+.grid__cell--extends-bottom {
+  border-bottom: black solid 1px;
+}
+
+.grid__cell--extends-left {
+  border-left: black solid 1px;
+}
+
+.grid__cell--extends-right {
+  border-right: black solid 1px;
+}
+
 .grid__cell.tile-0 {
   color: rgba(238, 228, 218, 0.35);
 }
